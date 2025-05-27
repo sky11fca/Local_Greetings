@@ -48,6 +48,9 @@ if(session_status() === PHP_SESSION_NONE){
             $controller->logout();
             break;
         default:
+            if(isset($_COOKIE['session_auth'])){
+                header('Location: ?action=home');
+            }
             $controller = new HomeController();
             $controller->index();
     }

@@ -17,8 +17,9 @@ class AuthController{
         $user = $this->userModel->login($username, $password);
 
         if($user){
-            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['username'] = $user['username'];
+            setcookie('session_auth', $user['user_id'] . ' ' . $user['username'], time() + 86400, '/');
             header('Location: ?action=home');
             exit();
         }
@@ -47,6 +48,7 @@ class AuthController{
     }
     public function logout(){
         session_destroy();
+        setcookie('session_auth', '', time() - 3600, '/');
         header('Location: ?action=landing');
     }
 }
