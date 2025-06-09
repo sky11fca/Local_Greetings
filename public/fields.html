@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Fields - Iași Sports Network</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/fields.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo"><a href="index.html">Local Greeting</a></div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home Page</a></li>
+                    <li><a href="events.html">Events List</a></li>
+                    <li><a href="create-event.html">Create Event</a></li>
+                    <li><a href="fields.html">Sports Fields</a></li>
+                    <li class="dropdown">
+                        <a href="#">More Info &#9662;</a>
+                        <div class="dropdown-content">
+                            <a href="#">About</a>
+                            <a href="#">Contact</a>
+                            <a href="#">FAQ</a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <a href="register.html" class="btn btn-secondary">Sign Up</a>
+                <a href="login.html" class="btn btn-primary">Login</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="fields-list">
+            <div class="container">
+                <h2>All Sports Fields</h2>
+                <div class="filters">
+                    <input type="text" id="search-field" placeholder="Search by location...">
+                    <select id="sport-type-filter">
+                        <option value="">All Sport Types</option>
+                        <option value="football">Football</option>
+                        <option value="basketball">Basketball</option>
+                        <option value="tennis">Tennis</option>
+                        <option value="yoga">Yoga</option>
+                    </select>
+                    <input type="number" id="radius-filter" placeholder="Radius (km)" value="5" min="1">
+                    <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
+                </div>
+                <div class="field-grid">
+                    <!-- Sports field cards will be loaded here by JavaScript -->
+                </div>
+                <div class="pagination">
+                    <!-- Pagination controls will go here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Iași Sports Network. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/fields.js"></script>
+</body>
+</html> 

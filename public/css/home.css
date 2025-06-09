@@ -1,0 +1,202 @@
+/* Hero Section */
+#hero {
+    position: relative;
+    height: 100vh;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--white-color);
+    overflow: hidden;
+    background-image: url('images/landing-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Dark overlay for text readability */
+    z-index: 1;
+}
+
+#hero .container {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    padding: 0 20px;
+}
+
+#hero h1 {
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    color: var(--white-color);
+    animation: fadeInUp 1s ease-out;
+}
+
+#hero p {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    animation: fadeInUp 1s ease-out 0.3s backwards;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    animation: fadeInUp 1s ease-out 0.6s backwards;
+}
+
+.hero-buttons .btn {
+    padding: 15px 35px;
+    font-size: 1.1rem;
+    border-radius: 30px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.hero-buttons .btn-primary {
+    background: var(--gradient-primary);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+
+.hero-buttons .btn-secondary {
+    background: var(--gradient-secondary);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+}
+
+.hero-buttons .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.slideshow-dots {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    gap: 12px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dot.active {
+    background: var(--white-color);
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Latest Events Section */
+#latest-events {
+    padding: 80px 0; /* Consistent padding */
+    background-color: var(--white-color); /* Ensures white background */
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); /* Subtle shadow, matches image */
+    margin-bottom: 40px; /* Space before map section */
+    border-radius: 0; /* No rounded corners for this section */
+    max-width: none; /* No max width for this section */
+}
+
+#latest-events h2 {
+    font-size: 2.8rem; /* Consistent heading size */
+    margin-bottom: 3.5rem;
+    color: var(--text-color);
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.1); /* Subtle text shadow */
+}
+
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    justify-content: center;
+}
+
+.event-card {
+    background-color: var(--light-color); /* Card background */
+    border-radius: 8px; /* Standard rounded corners */
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-5px); /* Subtle lift */
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* Slightly more pronounced shadow on hover */
+}
+
+.event-card img {
+    width: 100%;
+    height: 220px; /* Standard image height */
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+    filter: brightness(1); /* No dim for card images */
+    transition: none;
+}
+
+.event-card:hover img {
+    filter: brightness(1); /* No change on hover */
+}
+
+.event-card h3 {
+    font-size: 1.6rem;
+    margin: 20px 0 8px;
+    color: var(--primary-color);
+}
+
+.event-card p {
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+    padding: 0 15px;
+}
+
+/* Map Section */
+#map-section {
+    padding: 80px 0; /* Consistent padding */
+    background-color: transparent; /* Allow body background to show */
+    text-align: center;
+}
+
+#map-section .map-image {
+    width: 100%;
+    max-width: 950px; /* Standard map size */
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1); /* Subtle shadow */
+    margin-bottom: 40px;
+}
+
+#map-section .btn {
+    padding: 15px 30px; /* Standard button size */
+    font-size: 1.2rem; /* Standard button font size */
+} 

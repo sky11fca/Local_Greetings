@@ -1,0 +1,62 @@
+/* Create Event Section */
+#create-event-section {
+    padding: 80px 0;
+    background-color: var(--light-color);
+    text-align: center;
+}
+
+#create-event-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: var(--dark-color);
+}
+
+#createEventForm {
+    background-color: var(--white-color);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+#createEventForm .form-group {
+    margin-bottom: 20px;
+}
+
+#createEventForm label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+#createEventForm input[type="text"],
+#createEventForm input[type="datetime-local"],
+#createEventForm input[type="number"],
+#createEventForm select,
+#createEventForm textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: var(--text-color);
+    transition: border-color 0.3s ease;
+}
+
+#createEventForm input:focus,
+#createEventForm select:focus,
+#createEventForm textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+#createEventForm textarea {
+    resize: vertical;
+}
+
+#createEventForm .btn-block {
+    margin-top: 30px;
+} 
