@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - Local Greeting</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css"> <!-- Reusing auth.css for general layout -->
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo"><a href="index.html">Local Greeting</a></div>
+            <button class="hamburger-menu" aria-label="Toggle Navigation">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="events.html">Events</a></li>
+                </ul>
+                <!-- New Profile Button -->
+                <a href="account.html" class="btn btn-primary profile-link">Profile</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="account-details-section">
+            <div class="container mt-5">
+                <div class="auth-container">
+                    <div id="logged-in-account-content" class="auth-box" style="display: none;">
+                        <h2>My Account Details</h2>
+                        <div class="account-info">
+                            <p><strong>Name:</strong> <span id="account-name">John Doe</span></p>
+                            <p><strong>Email:</strong> <span id="account-email">john.doe@example.com</span></p>
+                            <!-- You can add more details here, e.g., joined events, created events -->
+                        </div>
+                        <a href="profile.html" class="btn btn-primary btn-block mt-3">Edit Profile</a>
+                        <button id="logoutButton" class="btn btn-secondary btn-block mt-3">Log Out</button>
+                    </div>
+
+                    <div id="logged-out-account-content" class="auth-box" style="display: none;">
+                        <h2>Welcome!</h2>
+                        <p>Please log in or sign up to view your account details.</p>
+                        <a href="login.html" class="btn btn-primary btn-block mb-3">Log In</a>
+                        <a href="register.html" class="btn btn-secondary btn-block">Sign Up</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>A project by Hasan MD Mehedi and Bazon Bogdan</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loggedInContent = document.getElementById('logged-in-account-content');
+            const loggedOutContent = document.getElementById('logged-out-account-content');
+            const logoutButton = document.getElementById('logoutButton');
+
+            // Simulate user data
+            const simulatedUserData = {
+                name: 'John Doe',
+                email: 'john.doe@example.com'
+            };
+
+            // Check for a developer override in the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const isDeveloper = urlParams.get('dev') === 'true';
+
+            function updateAccountView() {
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                if (isLoggedIn === 'true' || isDeveloper) {
+                    loggedInContent.style.display = 'block';
+                    loggedOutContent.style.display = 'none';
+                    // Populate simulated user data
+                    document.getElementById('account-name').textContent = simulatedUserData.name;
+                    document.getElementById('account-email').textContent = simulatedUserData.email;
+                } else {
+                    loggedInContent.style.display = 'none';
+                    loggedOutContent.style.display = 'block';
+                }
+            }
+
+            if (logoutButton) {
+                logoutButton.addEventListener('click', () => {
+                    localStorage.removeItem('isLoggedIn');
+                    alert('Logged out successfully! (Frontend simulation)');
+                    updateAccountView(); // Update view after logout
+                    // Optionally redirect to home page or login page
+                    // window.location.href = 'index.html';
+                });
+            }
+
+            updateAccountView(); // Initial view update
+        });
+    </script>
+</body>
+</html> 

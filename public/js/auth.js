@@ -10,29 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = loginForm.email.value;
             const password = loginForm.password.value;
 
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password }),
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert(data.message);
-                    // Store token and redirect, e.g., to dashboard.html
-                    localStorage.setItem('jwt_token', data.token);
-                    window.location.href = 'index.html'; 
-                } else {
-                    alert(data.error || 'Login failed');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            }
+            // Simulate a successful login for frontend demonstration
+            console.log(`Attempting login with Email: ${email}, Password: ${password}`);
+            alert('Login successful! Redirecting...');
+            // In a real application, you'd receive a token and redirect based on backend response.
+            // For demonstration, we just redirect.
+            localStorage.setItem('isLoggedIn', 'true'); // Set login status
+            setTimeout(() => {
+                window.location.href = 'account.html'; // Redirect to account page after login
+            }, 500); // Simulate network delay
         });
     }
 
@@ -49,29 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            try {
-                const response = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ username, email, password }),
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert(data.message);
-                    // Store token and redirect
-                    localStorage.setItem('jwt_token', data.token);
-                    window.location.href = 'index.html'; 
-                } else {
-                    alert(data.error || 'Registration failed');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            }
+            // Simulate a successful registration for frontend demonstration
+            console.log(`Attempting registration with Username: ${username}, Email: ${email}, Password: ${password}`);
+            alert('Registration successful! Redirecting...');
+            // In a real application, you'd receive a token and redirect based on backend response.
+            // For demonstration, we just redirect.
+            localStorage.setItem('isLoggedIn', 'true'); // Set login status
+            setTimeout(() => {
+                window.location.href = 'account.html'; // Redirect to account page after registration
+            }, 500); // Simulate network delay
         });
     }
 }); 

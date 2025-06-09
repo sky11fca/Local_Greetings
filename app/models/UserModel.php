@@ -33,4 +33,32 @@ class UserModel{
         $stmt = $this->db->prepare("INSERT INTO Users (username, email, password_hash) VALUES (?, ?, ?)");
         return $stmt->execute([$username, $email, $hashedPassword]);
     }
+
+    public function updateProfile($userId, $data) {
+        $setClauses = [];
+        $params = [];
+
+        if (isset($data['username'])) {
+            $setClauses[] = 'username = ?';
+            $params[] = $data['username'];
+        }
+        if (isset($data['email'])) {
+            $setClauses[] = 'email = ?';
+            $params[] = $data['email'];
+        }
+        if (isset($data['password'])) {
+            $setClauses[] = 'password_hash = ?';
+            $params[] = password_hash($data['password'], PASSWORD_BCRYPT);
+        }
+
+        if (empty($setClauses)) {
+            return false; // No data to update
+        }
+
+        $sql = "UPDATE Users SET " . implode(', ', $setClauses) . " WHERE user_id = ?";
+        $params[] = $userId;
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($params);
+    }
 }

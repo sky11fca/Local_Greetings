@@ -111,6 +111,11 @@ body.dark-mode .filters {
 body.dark-mode footer {
     background-color: var(--dark-dark-color);
     color: rgba(224,224,224,0.7);
+    font-size: 1rem; /* Set a readable font size for the copyright text */
+}
+
+footer p {
+    font-size: 1.2rem !important; /* Force increase font size for footer text */
 }
 
 /* Theme Toggle Button */
@@ -242,7 +247,7 @@ header {
     width: 100%;
     top: 0;
     left: 0;
-    z-index: 9999; /* Ensure header is always on top */
+    z-index: 99999; /* Extremely high z-index to ensure header is always on top */
     box-shadow: none; /* No shadow as per image */
 }
 
@@ -255,6 +260,8 @@ header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative; /* Ensure stacking context for children */
+    z-index: 2; /* Higher than main-nav when collapsed */
 }
 
 header .logo {
@@ -273,6 +280,13 @@ header .logo a {
 
 header .logo a:hover {
     opacity: 0.9;
+}
+
+header nav.main-nav {
+    display: flex; /* Make main-nav a flex container */
+    align-items: center; /* Vertically align items */
+    justify-content: space-between; /* Push nav ul to left, profile dropdown to right */
+    width: 100%; /* Ensure it takes full width within container */
 }
 
 header nav ul {
@@ -309,13 +323,13 @@ header nav ul li a:hover {
     z-index: 1;
     border-radius: 4px; /* Matches image */
     overflow: hidden;
-    margin-top: 8px; /* Matches image */
+    margin-top: 5px; /* Reduced from 8px to 5px to bring it closer */
     border: none;
 }
 
 .dropdown-content a {
     color: var(--white-color) !important;
-    padding: 10px 15px; /* Matches image */
+    padding: 8px 15px; /* Adjusted padding to be a bit tighter */
     text-decoration: none;
     display: block;
     text-align: left;
@@ -405,80 +419,156 @@ footer {
     color: var(--white-color);
     padding: 2rem 0;
     margin-top: 4rem;
+    font-size: 1rem; /* Set a readable font size for the copyright text */
 }
 
 /* Auth Buttons */
 .auth-buttons {
-    display: flex;
-    gap: 15px;
-    align-items: center;
+    /* These styles are now for the nested auth-buttons within the mobile menu only */
+    display: none; /* Hide on desktop, will be flex on mobile via media query */
 }
 
-.auth-buttons .btn {
-    padding: 10px 25px;
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border-radius: 25px;
-}
-
-.auth-buttons .btn-primary {
-    background: var(--gradient-primary);
-    color: var(--white-color);
-}
-
-.auth-buttons .btn-secondary {
-    background: var(--gradient-secondary);
-    color: var(--white-color);
-}
-
-.auth-buttons .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-/* Colorful Section Headers */
-section h2 {
-    color: var(--dark-color);
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    text-align: center;
-    position: relative;
-    padding-bottom: 15px;
-}
-
-section h2::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 4px;
-    background: var(--gradient-primary);
-    border-radius: 2px;
-}
-
-/* Colorful Cards */
-.event-card, .field-card {
-    background: var(--white-color);
-    border-radius: 15px;
-    overflow: hidden;
-    transition: all 0.3s ease;
+/* Hamburger Menu */
+.hamburger-menu {
+    display: none; /* Hidden by default on desktop */
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 25px;
+    background: transparent;
     border: none;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    cursor: pointer;
+    padding: 0;
+    z-index: 100000; /* Even higher to be above header for clickability */
 }
 
-.event-card:hover, .field-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+.hamburger-menu .bar {
+    width: 100%;
+    height: 3px;
+    background-color: var(--white-color);
+    border-radius: 10px;
+    transition: all 0.3s ease;
 }
 
-/* Leaflet Map Adjustments */
-.leaflet-control-container {
-    z-index: 999 !important; /* Ensure Leaflet controls are below the header */
+.hamburger-menu.active .bar:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
 }
 
-.leaflet-bottom, .leaflet-top {
-    z-index: 999 !important;
+.hamburger-menu.active .bar:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-menu.active .bar:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* Mobile specific adjustments for dropdowns */
+@media (max-width: 768px) {
+    /* Adjust main-nav to stack items */
+    header nav.main-nav.active {
+        flex-direction: column;
+        align-items: flex-start; /* Align items to the start in mobile menu */
+        padding-top: 20px; /* Add padding for better spacing */
+        position: absolute; /* Changed to absolute to float over content */
+        top: 60px; /* Position below header */
+        left: 0;
+        width: 100%;
+        height: auto; /* Allow content to dictate height */
+        background-color: var(--dark-color);
+        box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        z-index: 100001; /* Ensure this is on top when active */
+        overflow-y: auto; /* Enable scrolling if content is too long */
+        padding-bottom: 20px; /* Add padding at the bottom */
+    }
+
+    header nav.main-nav ul {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start; /* Align nav links to the start */
+    }
+
+    header nav.main-nav ul li {
+        margin: 0; /* Reset margin */
+        width: 100%;
+    }
+
+    header nav.main-nav ul li a {
+        padding: 12px 20px; /* Adjust padding */
+        text-align: left; /* Align text to left */
+    }
+
+    header .container {
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    header nav.main-nav {
+        display: none; /* Hide desktop nav */
+        flex-direction: column;
+        width: 100%;
+        background-color: var(--dark-color); /* Same as header */
+        position: absolute;
+        top: 60px; /* Below header */
+        left: 0;
+        padding: 20px 0;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        z-index: 9998; /* Below hamburger, above content */
+    }
+
+    header nav.main-nav.active {
+        display: flex; /* Show when active */
+    }
+
+    header nav.main-nav ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    header nav.main-nav ul li {
+        margin: 10px 0;
+        text-align: center;
+    }
+
+    header nav.main-nav ul li a {
+        padding: 10px 20px;
+        display: block;
+        font-size: 1.1rem;
+    }
+
+    header .auth-buttons {
+        display: flex; /* Ensure auth buttons are visible within mobile menu */
+        flex-direction: column; /* Stack buttons vertically */
+        width: 100%;
+        padding: 10px 20px;
+        gap: 10px; /* Space between buttons */
+        margin-top: 15px; /* Space from nav links */
+        background-color: var(--dark-color); /* Match nav background */
+        box-shadow: none; /* No extra shadow */
+        position: static; /* Remove absolute positioning */
+    }
+
+    header .auth-buttons a.btn {
+        width: 100%; /* Make buttons full width */
+        text-align: center;
+        padding: 12px 0;
+        font-size: 1rem;
+    }
+
+    .hamburger-menu {
+        display: flex; /* Show hamburger on mobile */
+    }
+
+    header .logo {
+        /* Adjust logo size if needed for mobile */
+        font-size: 1.3rem;
+    }
+
+    header .logo a {
+        font-size: 1.3rem;
+    }
+
+    /* Adjust main content padding for fixed header */
+    main {
+        padding-top: 80px; /* More space for header */
+    }
 } 

@@ -9,7 +9,7 @@
     text-align: center;
     color: var(--white-color);
     overflow: hidden;
-    background-image: url('images/landing-bg.jpg');
+    /* background-image: url('../images/landing-bg.jpg'); Removed as requested */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

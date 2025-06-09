@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 offset: (currentPage - 1) * limit,
                 ...filters
             });
-            const response = await fetch(`/api/sports-fields?${params.toString()}`);
+            const response = await fetch(`index.php?action=listFields&${params.toString()}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
