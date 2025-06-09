@@ -21,8 +21,13 @@
                     <li><a href="index.html">Home</a></li>
                     <li><a href="events.html">Events</a></li>
                 </ul>
-                <!-- New Profile Button -->
-                <a href="account.html" class="btn btn-primary profile-link">Profile</a>
+                <!-- Profile Nav Item -->
+                <div class="profile-nav-item">
+                    <a href="account.html" class="btn btn-primary profile-link" id="profile-button">Profile</a>
+                    <a href="account.html" class="profile-pic-link" id="profile-picture-link" style="display: none;">
+                        <img src="images/default-profile.png" alt="Profile" class="profile-pic">
+                    </a>
+                </div>
             </nav>
         </div>
     </header>
@@ -33,6 +38,9 @@
                 <div class="auth-container">
                     <div id="logged-in-account-content" class="auth-box" style="display: none;">
                         <h2>My Account Details</h2>
+                        <div class="profile-pic-container">
+                            <img src="images/default-profile.png" alt="Profile Picture" class="account-profile-pic">
+                        </div>
                         <div class="account-info">
                             <p><strong>Name:</strong> <span id="account-name">John Doe</span></p>
                             <p><strong>Email:</strong> <span id="account-email">john.doe@example.com</span></p>

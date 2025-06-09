@@ -21,8 +21,13 @@
                     <li><a href="index.html">Home</a></li>
                     <li><a href="events.html">Events</a></li>
                 </ul>
-                <!-- New Profile Button -->
-                <a href="account.html" class="btn btn-primary profile-link">Profile</a>
+                <!-- Profile Nav Item -->
+                <div class="profile-nav-item">
+                    <a href="account.html" class="btn btn-primary profile-link" id="profile-button">Profile</a>
+                    <a href="account.html" class="profile-pic-link" id="profile-picture-link" style="display: none;">
+                        <img src="images/default-profile.png" alt="Profile" class="profile-pic">
+                    </a>
+                </div>
             </nav>
         </div>
     </header>
@@ -33,6 +38,14 @@
                 <div class="auth-container">
                     <div class="auth-box">
                         <h2>Edit Your Profile</h2>
+                        <div class="form-group profile-picture-upload">
+                            <label for="profile-picture-input">Profile Picture</label>
+                            <div class="profile-picture-preview-container">
+                                <img src="images/default-profile.png" alt="Current Profile Picture" id="current-profile-pic" class="account-profile-pic">
+                                <input type="file" id="profile-picture-input" accept="image/*">
+                                <label for="profile-picture-input" class="btn btn-secondary btn-upload">Change Picture</label>
+                            </div>
+                        </div>
                         <form id="profileEditForm">
                             <div class="form-group">
                                 <label for="username">Username</label>
@@ -70,10 +83,26 @@
 
     <script src="js/main.js"></script>
     <script>
-        // Basic client-side validation for profile edit form
         document.addEventListener('DOMContentLoaded', () => {
             const profileEditForm = document.getElementById('profileEditForm');
+            const profilePictureInput = document.getElementById('profile-picture-input');
+            const currentProfilePic = document.getElementById('current-profile-pic');
 
+            // Profile picture preview logic
+            if (profilePictureInput && currentProfilePic) {
+                profilePictureInput.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            currentProfilePic.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // Basic client-side validation for profile edit form
             if (profileEditForm) {
                 profileEditForm.addEventListener('submit', (e) => {
                     e.preventDefault();

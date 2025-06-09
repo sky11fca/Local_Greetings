@@ -31,8 +31,13 @@
                     <li><a href="index.html">Home</a></li>
                     <li><a href="events.html">Events</a></li>
                 </ul>
-                <!-- New Profile Button -->
-                <a href="account.html" class="btn btn-primary profile-link">Profile</a>
+                <!-- Profile Nav Item -->
+                <div class="profile-nav-item">
+                    <a href="account.html" class="btn btn-primary profile-link" id="profile-button">Profile</a>
+                    <a href="account.html" class="profile-pic-link" id="profile-picture-link">
+                        <img src="images/default-profile.png" alt="Profile" class="profile-pic">
+                    </a>
+                </div>
             </nav>
         </div>
     </header>
@@ -67,5 +72,19 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="js/map.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const heroButtons = document.querySelector('.hero-buttons');
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            
+            if (isLoggedIn) {
+                // If user is logged in, remove the signup button and keep only the explore events button
+                const signupButton = heroButtons.querySelector('a[href="register.html"]');
+                if (signupButton) {
+                    signupButton.remove();
+                }
+            }
+        });
+    </script>
 </body>
 </html> 
