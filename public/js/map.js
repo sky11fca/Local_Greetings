@@ -30,9 +30,24 @@ fetch(overpassUrl, {
         const lat = el.lat || el.center?.lat;
         const lon = el.lon || el.center?.lon;
         if (lat && lon) {
+            let popupContent = "Sports Field";
+            if (el.tags) {
+                if (el.tags.name) {
+                    popupContent = `<b>${el.tags.name}</b>`;
+                } else if (el.tags.sport) {
+                    popupContent = `<b>${el.tags.sport.charAt(0).toUpperCase() + el.tags.sport.slice(1)} Pitch</b>`;
+                }
+                if (el.tags.address && el.tags.address.street && el.tags.address.house_number) {
+                    popupContent += `<br>${el.tags.address.street} ${el.tags.address.house_number}`;
+                } else if (el.tags.addr && el.tags.addr.street && el.tags.addr.housenumber) {
+                    popupContent += `<br>${el.tags.addr.street} ${el.tags.addr.housenumber}`;
+                } else if (el.tags.addr && el.tags.addr.full) {
+                    popupContent += `<br>${el.tags.addr.full}`;
+                }
+            }
             L.marker([lat, lon])
                 .addTo(map)
-                .bindPopup("Sports Field (leisure=pitch)");
+                .bindPopup(popupContent);
         }
     });
 })
