@@ -19,8 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleApiResponse = async (response, messageElement) => {
         try{
-            const responseData = await response.json();
 
+            console.log(response);
+
+            const responseData = await response.json();
+            console.log(responseData);
             if(!responseData.trim()){
                 throw new Error('Empty response');
             }
@@ -46,6 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const makeApiCall = async (url, method, body, messageElement) => {
         try{
+
+            console.log(url, method, body);
 
             const response = await fetch(url, {
                 method,
@@ -130,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await makeApiCall('/local_greeter/api/auth/register', 'POST', {username, email, password}, registerMessage);
 
-            if(data.status === "success" && data){
+            if(data.status === "success"){
                 showMessage(registerMessage, data.message, 'success');
                 setTimeout(()=>{
                     window.location.href = '/local_greeter/login';

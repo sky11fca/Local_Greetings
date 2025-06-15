@@ -28,7 +28,7 @@ class UserModel{
 
     public function getUserByEmail($email)
     {
-        $query = "SELECT * FORM {this->table} WHERE email = :email LIMIT 1";
+        $query = "SELECT * FORM {$this->table} WHERE email = :email LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':email', $email, PDO::PARAM_STR);
         $stmt->execute();
@@ -37,7 +37,7 @@ class UserModel{
 
     public function getUserByUsername($username)
     {
-        $query = "SELECT * FORM {this->table} WHERE username = :username LIMIT 1";
+        $query = "SELECT * FORM {$this->table} WHERE username = :username LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':username', $username);
         $stmt->execute();
@@ -45,8 +45,15 @@ class UserModel{
     }
 
     public function addUser($username, $email, $hashedPassword){
-        $stmt = $this->conn->prepare("INSERT INTO Users (username, email, password_hash) VALUES (?, ?, ?)");
-        return $stmt->execute([$username, $email, $hashedPassword]);
+        //$stmt = $this->conn->prepare("INSERT INTO Users (username, email, password_hash) VALUES (?, ?, ?)");
+        //return $stmt->execute([$username, $email, $hashedPassword]);
+
+        $query = "INSERT INTO {$this->table} (username, email, password_hash) VALUES (:username, :email, :password_hash)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':password_hash', $hashedPassword);
+        return $stmt->execute();
     }
 
     public function updateProfile($userId, $data) {
@@ -73,7 +80,7 @@ class UserModel{
         $sql = "UPDATE Users SET " . implode(', ', $setClauses) . " WHERE user_id = ?";
         $params[] = $userId;
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->conn->prepare($sql);
         return $stmt->execute($params);
     }
 }

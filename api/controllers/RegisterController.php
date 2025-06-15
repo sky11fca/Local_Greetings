@@ -1,12 +1,7 @@
 <?php
 
-header('Content-Type: application/json');
 require_once __DIR__ . '/../services/AuthService.php';
 require_once __DIR__ . '/../../config/Database.php';
-
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type");
 
 class RegisterController{
     private $authService;
@@ -18,13 +13,24 @@ class RegisterController{
     }
 
     public function handleRequest(){
+        header('Content-Type: application/json');
         try{
-            $json = file_get_contents('php://input');
-            $data = json_decode($json, true);
-
             if($_SERVER['REQUEST_METHOD'] !== 'POST'){
                 throw new Exception('Method not allowed', 405);
             }
+
+            $json = file_get_contents('php://input');
+
+            if($json === false){
+                throw new Exception('Invalid input', 400);
+            }
+
+            if(empty($json)){
+                throw new Exception('Empty input', 400);
+            }
+
+            $data = json_decode($json, true);
+
 
             if(json_last_error() !== JSON_ERROR_NONE){
                 throw new Exception('Invalid JSON', 400);
@@ -38,23 +44,29 @@ class RegisterController{
                 }
             }
 
+            if(!filter_var($data['email'], FILTER_VALIDATE_EMAIL)){
+                throw new Exception('Invalid email', 400);
+            }
+
+            if(strlen($data['password']) < 6){
+                throw new Exception('Password must be at least 6 characters', 400);
+            }
+
             $response = $this->authService->register(
-                $data['username'],
-                $data['email'],
+                trim($data['username']),
+                trim($data['email']),
                 $data['password']
             );
 
-            if($response['success']){
-                http_response_code(201);
-                echo json_encode([
-                    'status' => 'success',
-                    'message' => $response['message'],
-                    'user' => $response['user']
-                ]);
-            }
-            else{
+           if(!$response['success']){
                 throw new Exception($response['message'], 400);
             }
+           http_response_code(201);
+           echo json_encode([
+               'status' => 'success',
+               'message' => 'Registration successful',
+           ]);
+
         }catch(Exception $e){
             http_response_code($e->getCode()?: 500);
             echo json_encode([

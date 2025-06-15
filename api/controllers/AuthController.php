@@ -51,3 +51,5 @@ class AuthController{
         }
     }
 }
+$controller = new AuthController();
+$controller->handleRequest();

@@ -34,7 +34,7 @@ class AuthService{
                 ];
             }
         }
-
+        http_response_code(401);
         return [
             'success' => false,
             'message' => 'Invalid username or password'
@@ -44,6 +44,7 @@ class AuthService{
     public function register($username, $email, $password){
         $stmt = $this->userModel->getUserByEmail($email);
         if($stmt->rowCount() > 0){
+            http_response_code(400);
             return [
                 'success' => false,
                 'message' => 'Email already exists'
@@ -52,6 +53,7 @@ class AuthService{
 
         $stmt = $this->userModel->getUserByUsername($username);
         if($stmt->rowCount() > 0){
+            http_response_code(400);
             return [
                 'success' => false,
                 'message' => 'Username already exists'
@@ -66,6 +68,7 @@ class AuthService{
                 'message' => 'User created successfully'
             ];
         }
+        http_response_code(500);
         return [
             'success' => false,
         ];
