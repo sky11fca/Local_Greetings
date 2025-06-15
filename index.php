@@ -1,131 +1,67 @@
+
 <?php
 
-require __DIR__ . '/app/models/UserModel.php';
-require __DIR__ . '/app/models/EventModel.php';
-require __DIR__ . '/app/models/SportsFieldModel.php';
-require __DIR__ . '/app/controllers/AuthController.php';
-require __DIR__ . '/app/controllers/UserController.php';
-require __DIR__ . '/app/controllers/HomeController.php';
-require __DIR__ . '/app/controllers/SportsFieldController.php';
+require_once __DIR__ . '/config/Database.php';
 
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_name('local_greeter');
-    session_set_cookie_params([
-        'lifetime' => 86400,
-        'path' => '/',
-        'secure' => false, // Set to true if using HTTPS
-        'httponly' => true,
-        'samesite' => 'Lax'
-    ]);
-    session_start();
+define('PROJ_NAME', 'local_greeter');
+define('BASE_URL', '/' . PROJ_NAME);
+define('PUBLIC_PATH', __DIR__ . '/public');
+define('VIEWS_PATH', __DIR__ . '/app/views');
+
+$requestPath = isset($_GET['path']) ? $_GET['path'] : '';
+$requestPath = trim($requestPath, '/');
+
+//$pathParts = explode('/', $requestPath);
+
+//client routes
+$routes = [
+    '' => 'index.html',
+    'login' => 'login.html',
+    'register' => 'register.html',
+    'account' => 'account.html',
+    'events' => 'events.html',
+    'fields' => 'fields.html',
+    'profile' => 'profile.html',
+    'create-event' => 'create-event.html',
+    'event' => 'event.html',
+
+];
+
+//API routes
+if(strpos($requestPath, 'api/') === 0) {
+    $apiEndpoint = substr($requestPath, 4);
+
+    //API Routing
+
+    if($apiEndpoint === 'auth/login') {
+        require_once __DIR__ . '/api/controllers/AuthController.php';
+    }
+    elseif($apiEndpoint === 'auth/register') {
+        require_once __DIR__ . '/api/controllers/RegisterController.php';
+    }
+    else{
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'API endpoint not found']);
+    }
+
+    exit;
 }
 
-// Basic Routing
-$action = $_GET['action'] ?? 'landing';
+//HANDLE REGULAR ROUTES
+$routeKey = explode('/', $requestPath)[0];
+$viewFile = $routes[$routeKey] ?? null;
 
-switch ($action) {
-    case 'login':
-        $controller = new AuthController();
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $controller->login();
-        } else {
-            $controller->showLogin();
-        }
-        break;
+if($viewFile && file_exists(VIEWS_PATH . '/' . $viewFile)) {
+    $baseUrl = BASE_URL;
+    require VIEWS_PATH . '/' . $viewFile;
+}
+else{
+    http_response_code(404);
+    if(file_exists(VIEWS_PATH . '/404.html')) {
+        require VIEWS_PATH . '/404.html';
+    }
+    else{
+        echo '404';
+    }
 
-    case 'register':
-        $controller = new AuthController();
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $controller->register();
-        } else {
-            $controller->showRegister();
-        }
-        break;
-
-    case 'home':
-        $controller = new HomeController();
-        $controller->home();
-        break;
-
-    case 'logout':
-        $controller = new AuthController();
-        $controller->logout();
-        break;
-
-    case 'updateProfile':
-        $controller = new UserController();
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $controller->updateProfile();
-        } else {
-            // Optionally, handle GET request to show profile edit form
-            // For now, assuming POST for update action
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
-        }
-        break;
-
-    case 'joinEvent':
-        $controller = new EventController();
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Assuming eventId and userId are passed as parameters
-            // In a real application, these would come from the request body or URL segments
-            $eventId = $_POST['event_id'] ?? null;
-            $userId = $_SESSION['user_id'] ?? null; // Get user from session
-
-            if ($eventId && $userId) {
-                $controller->joinEvent($eventId, $userId);
-            } else {
-                header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'message' => 'Missing event_id or user_id']);
-            }
-        } else {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
-        }
-        break;
-
-    case 'leaveEvent':
-        $controller = new EventController();
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $eventId = $_POST['event_id'] ?? null;
-            $userId = $_SESSION['user_id'] ?? null;
-
-            if ($eventId && $userId) {
-                $controller->leaveEvent($eventId, $userId);
-            } else {
-                header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'message' => 'Missing event_id or user_id']);
-            }
-        } else {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
-        }
-        break;
-
-    case 'listFields':
-        $controller = new SportsFieldController();
-        $controller->listFields();
-        break;
-
-    case 'getField':
-        $controller = new SportsFieldController();
-        $fieldId = $_GET['field_id'] ?? null;
-        if ($fieldId) {
-            $controller->getField($fieldId);
-        } else {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Missing field_id']);
-        }
-        break;
-
-    default:
-        // If a user is logged in, redirect to home, otherwise show landing
-        if (isset($_SESSION['user_id'])) {
-            header('Location: ?action=home');
-        } else {
-            $controller = new HomeController();
-            $controller->index(); // Show landing page
-        }
-        break;
-} 
+}

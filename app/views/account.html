@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account - Local Greeting</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/auth.css"> <!-- Reusing auth.css for general layout -->
+    <base href="/local_greeter/">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/auth.css"> <!-- Reusing auth.css for general layout -->
 </head>
 <body>
     <header>
@@ -59,7 +60,7 @@
         </div>
     </footer>
 
-    <script src="js/main.js"></script>
+    <script src="/js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const loggedInContent = document.getElementById('logged-in-account-content');

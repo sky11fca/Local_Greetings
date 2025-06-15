@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports Fields - Iași Sports Network</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/fields.css">
+    <title>Events List - Iași Sports Network</title>
+    <base href="/local_greeter/">
+    <link rel="stylesheet" href="../../public/css/style.css">
+    <link rel="stylesheet" href="../../public/css/events.css">
 </head>
 <body>
     <header>
@@ -19,7 +20,7 @@
             <nav class="main-nav">
                 <ul>
                     <li><a href="index.html">Home Page</a></li>
-                    <li><a href="events.html">Events</a></li>
+                    <li><a href="create-event.html">Create Event</a></li>
                 </ul>
                 <!-- New Profile Button -->
                 <a href="account.html" class="btn btn-primary profile-link">Profile</a>
@@ -28,23 +29,28 @@
     </header>
 
     <main>
-        <section id="fields-list">
+        <section id="events-list">
             <div class="container">
-                <h2>All Sports Fields</h2>
+                <h2>All Sports Events</h2>
+                <div class="event-tabs">
+                    <button class="tab-btn active" data-tab="public">Public Events</button>
+                    <button class="tab-btn" data-tab="joined">My Joined Events</button>
+                    <button class="tab-btn" data-tab="created">My Created Events</button>
+                </div>
                 <div class="filters">
-                    <input type="text" id="search-field" placeholder="Search by location...">
+                    <input type="text" id="search-event" placeholder="Search events...">
                     <select id="sport-type-filter">
                         <option value="">All Sport Types</option>
                         <option value="football">Football</option>
                         <option value="basketball">Basketball</option>
                         <option value="tennis">Tennis</option>
                         <option value="yoga">Yoga</option>
+                        <!-- More options can be added dynamically -->
                     </select>
-                    <input type="number" id="radius-filter" placeholder="Radius (km)" value="5" min="1">
                     <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
                 </div>
-                <div class="field-grid">
-                    <!-- Sports field cards will be loaded here by JavaScript -->
+                <div class="event-grid">
+                    <!-- Event cards will be loaded here by JavaScript -->
                 </div>
                 <div class="pagination">
                     <!-- Pagination controls will go here -->
@@ -59,7 +65,7 @@
         </div>
     </footer>
 
-    <script src="js/main.js"></script>
-    <script src="js/fields.js"></script>
+    <script src="../../public/js/main.js"></script>
+    <script src="../../public/js/events.js"></script>
 </body>
 </html> 

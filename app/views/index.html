@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Local Greeting</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/home.css">
-    <link rel="stylesheet" href="css/map.css">
+    <base href="/local_greeter/">
+    <link rel="stylesheet" href="/local_greeter/public/css/style.css">
+    <link rel="stylesheet" href="/local_greeter/public/css/home.css">
+    <link rel="stylesheet" href="/local_greeter/public/css/map.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         #map { 
@@ -20,7 +21,7 @@
 <body>
     <header>
         <div class="container">
-            <div class="logo"><a href="index.html">Local Greeting</a></div>
+            <div class="logo"><a href="/index">Local Greeting</a></div>
             <button class="hamburger-menu" aria-label="Toggle Navigation">
                 <span class="bar"></span>
                 <span class="bar"></span>
@@ -28,11 +29,11 @@
             </button>
             <nav class="main-nav">
                 <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="events.html">Events</a></li>
+                    <li><a href="/index">Home</a></li>
+                    <li><a href="/local_greeter/events">Events</a></li>
                 </ul>
                 <!-- New Profile Button -->
-                <a href="account.html" class="btn btn-primary profile-link">Profile</a>
+                <a href="/local_greeter/account" class="btn btn-primary profile-link">Profile</a>
             </nav>
         </div>
     </header>
@@ -43,8 +44,8 @@
                 <h1>DISCOVER. ENGAGE. PLAY.</h1>
                 <p>Your ultimate platform for connecting with sports enthusiasts and exploring vibrant sports fields across Iași. Let's make every game an unforgettable experience!</p>
                 <div class="hero-buttons">
-                    <a href="register.html" class="btn btn-primary">Sign Up Today!</a>
-                    <a href="events.html" class="btn btn-secondary">Explore Events</a>
+                    <a href="/local_greeter/register" class="btn btn-primary">Sign Up Today!</a>
+                    <a href="/local_greeter/events" class="btn btn-secondary">Explore Events</a>
                 </div>
             </div>
         </section>
@@ -53,7 +54,7 @@
             <div class="container">
                 <h2>Find Sports Fields Near You</h2>
                 <div id="map"></div>
-                <a href="fields.html" class="btn btn-primary">Browse All Sports Fields</a>
+                <a href="/local_greeter/fields" class="btn btn-primary">Browse All Sports Fields</a>
             </div>
         </section>
     </main>
@@ -65,7 +66,7 @@
     </footer>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="js/map.js"></script>
-    <script src="js/main.js"></script>
+    <script src="/local_greeter/public/js/map.js"></script>
+    <script src="/local_greeter/public/js/main.js"></script>
 </body>
 </html> 
