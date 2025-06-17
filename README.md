@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Local Greeting - Sports Events Platform
 
 A modern web platform for discovering and participating in sports events in Iași.
@@ -95,4 +95,4 @@ with our platform, is easy to find non-reserved fields and booking one is simple
 
 **BACKEND/DEVOPS**
 - [Bazon Bogdan](https://github.com/sky11fca)
->>>>>>> d40158210e06855abc878ec8244c58d4a25613ff
+
