@@ -6,6 +6,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
+    function setCookie(name, value, days=7) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        const expires = `expires=${date.toUTCString()}`;
+        document.cookie = `${name}=${value};${expires};path=/`;
+    }
+
     function getUserData()
     {
         const userData = getCookie('userData');
@@ -20,18 +27,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function populateForm() {
+        const userData = getUserData();
+        if (!userData) {
+            window.location.href = '/local_greeter/app/views/login.html';
+        }
+        const {username, email} = userData;
+        profileEditForm.username.value = userData.username || '';
+        profileEditForm.email.value = userData.email || '';
+    }
 
+    populateForm();
 
     if (profileEditForm) {
         profileEditForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const {username, email, currentPassword, newPassword, confirmNewPassword} = profileEditForm;
+            const formData = {
+                username: profileEditForm.username.value.trim(),
+                email: profileEditForm.email.value.trim(),
+                currentPassword: profileEditForm.old_password.value.trim(),
+                newPassword: profileEditForm.new_password.value.trim(),
+                confirmNewPassword: profileEditForm.confirm_new_password.value.trim()
+            };
 
-            if (newPassword.value !== confirmNewPassword.value) {
+            if (formData.newPassword !== formData.confirmNewPassword && formData.newPassword) {
                 alert('Passwords do not match');
                 return;
             }
-            userData = getUserData();
+
+            const userData = getUserData();
+
+            if(!userData || !userData.id)
+            {
+                alert('Failed to update profile');
+                return;
+            }
 
             try {
                 const response = await fetch("/local_greeter/api/index.php?action=updateProfile", {
@@ -41,17 +71,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     body: JSON.stringify({
                         'user_id': userData.id,
-                        'username': username.value || '',
-                        'email': email.value || '',
-                        'password': newPassword.value || ''
+                        'username': formData.username || userData.username,
+                        'email': formData.email || userData.email,
+                        'password': formData.newPassword || undefined
                     })
                 });
-                if (!response.ok) {
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
                     throw new Error('Failed to update profile');
                 }
-                setTimeout(() => {
-                    window.location.href = '/local_greeter/app/views/account.html';
-                }, 1500)
+
+                const updatedUserData = {
+                    id: userData.id,
+                    username: formData.username,
+                    email: formData.email,
+                };
+                setCookie('userData', JSON.stringify(updatedUserData));
+
+                window.location.href = '/local_greeter/app/views/account.html';
+
+
             } catch (error) {
                 alert(error.message);
                 return;

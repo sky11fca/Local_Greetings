@@ -51,7 +51,7 @@ try{
     }
     else if($_SERVER['REQUEST_METHOD'] === 'PUT'){
        switch($endpoint){
-           case 'updateUser':
+           case 'updateProfile':
                $userController->updateUser();
                break;
             default:
