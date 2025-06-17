@@ -1,5 +1,7 @@
 <!---->
 <?php
+
+require_once __DIR__ . '/app/views/index.html';
 //
 //require_once __DIR__ . '/config/Database.php';
 //

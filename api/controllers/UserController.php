@@ -4,38 +4,48 @@ require_once __DIR__ . '/../models/UserModel.php';
 class UserController {
     private $userModel;
 
-    public function __construct() {
-        $this->userModel = new UserModel();
+    public function __construct($db) {
+        $this->userModel = new UserModel($db);
     }
 
-    public function updateProfile() {
-        // Check if user is logged in (simplified for now, actual authentication would be more robust)
-        if (!isset($_SESSION['user_id'])) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-            return;
-        }
 
-        $userId = $_SESSION['user_id'];
-        $data = json_decode(file_get_contents('php://input'), true);
 
-        if (!$data) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Invalid input']);
-            return;
-        }
+    public function updateUser(){
 
-        $updateSuccess = $this->userModel->updateProfile($userId, $data);
-
-        header('Content-Type: application/json');
-        if ($updateSuccess) {
-            // Update session username if it was changed
-            if (isset($data['username'])) {
-                $_SESSION['username'] = $data['username'];
+        try{
+            $data = json_decode(file_get_contents('php://input'), true);
+            $user = $this->userModel->getUserById($data['user_id']);
+            if(!$user){
+                throw new Exception('Invalid credentials');
             }
-            echo json_encode(['success' => true, 'message' => 'Profile updated successfully']);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to update profile']);
+            if(!empty($data['password'])){
+                $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT);
+            }
+
+            $rowcount = $this->userModel->updateWithPassword(
+                $user['user_id'],
+                $data['username'] ?? $user['username'],
+                $data['email'] ?? $user['email'],
+                $hashedPassword ?? $user['password_hash']
+            );
+
+            if($rowcount){
+                http_response_code(200);
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'User updated successfully'
+                ]);
+            }
+            else{
+                throw new Exception('User not updated');
+            }
+
+        }catch(Exception $e){
+            http_response_code($e->getCode() ?: 400);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
         }
     }
 } 

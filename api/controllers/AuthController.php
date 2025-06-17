@@ -30,9 +30,9 @@ class AuthController
             echo json_encode([
                 'success' => true,
                 'data' => [
-                    'user_id' => $user['user_id'],
-                    'username' => $user['username'],
-                    'email' => $user['email']
+                    "user_id" => $user['user_id'],
+                    "username" => $user['username'],
+                    "email" => $user['email'],
                 ]
             ]);
         } catch(Exception $e){

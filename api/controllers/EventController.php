@@ -5,24 +5,33 @@ class EventController
 {
     private $eventModel;
 
-    public function __construct()
+    public function __construct($db)
     {
-        $this->eventModel = new EventModel();
+        $this->eventModel = new EventModel($db);
     }
 
-    public function joinEvent($eventId, $userId)
+    public function listEvents()
     {
-        header('Content-Type: application/json');
-        $result = $this->eventModel->joinEvent($eventId, $userId);
-        echo json_encode($result);
+        //header('Content-Type: application/json');
+        $result = $this->eventModel->getAllEvents();
+        echo json_encode([
+            $result
+        ]);
     }
 
-    public function leaveEvent($eventId, $userId)
-    {
-        header('Content-Type: application/json');
-        $result = $this->eventModel->leaveEvent($eventId, $userId);
-        echo json_encode($result);
-    }
+//    public function joinEvent($eventId, $userId)
+//    {
+//        header('Content-Type: application/json');
+//        $result = $this->eventModel->joinEvent($eventId, $userId);
+//        echo json_encode($result);
+//    }
+//
+//    public function leaveEvent($eventId, $userId)
+//    {
+//        header('Content-Type: application/json');
+//        $result = $this->eventModel->leaveEvent($eventId, $userId);
+//        echo json_encode($result);
+//    }
 
     // You can add more methods here for other event-related functionalities if needed, like listing events, creating events, etc.
     // For now, focusing on join/leave as requested.

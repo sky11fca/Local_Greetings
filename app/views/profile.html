@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile - Local Greeting</title>
-    <base href="/local_greeter/">
-    <link rel="stylesheet" href="../../public/css/style.css">
-    <link rel="stylesheet" href="../../public/css/auth.css"> <!-- Reusing auth.css for form styling -->
+    <link rel="stylesheet" href="/local_greeter/public/css/style.css">
+    <link rel="stylesheet" href="/local_greeter/public/css/auth.css"> <!-- Reusing auth.css for form styling -->
 </head>
 <body>
     <header>
         <div class="container">
-            <div class="logo"><a href="index.html">Local Greeting</a></div>
+            <div class="logo"><a href="/local_greeter/app/views/index.html">Local Greeting</a></div>
             <button class="hamburger-menu" aria-label="Toggle Navigation">
                 <span class="bar"></span>
                 <span class="bar"></span>
@@ -19,11 +18,11 @@
             </button>
             <nav class="main-nav">
                 <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="events.html">Events</a></li>
+                    <li><a href="/local_greeter/app/views/index.html">Home</a></li>
+                    <li><a href="/local_greeter/app/views/events.html">Events</a></li>
                 </ul>
                 <!-- New Profile Button -->
-                <a href="account.html" class="btn btn-primary profile-link">Profile</a>
+                <a href="/local_greeter/app/views/account.html" class="btn btn-primary profile-link">Profile</a>
             </nav>
         </div>
     </header>
@@ -69,30 +68,7 @@
         </div>
     </footer>
 
-    <script src="../../public/js/main.js"></script>
-    <script>
-        // Basic client-side validation for profile edit form
-        document.addEventListener('DOMContentLoaded', () => {
-            const profileEditForm = document.getElementById('profileEditForm');
-
-            if (profileEditForm) {
-                profileEditForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const newPassword = profileEditForm.new_password.value;
-                    const confirmNewPassword = profileEditForm.confirm_new_password.value;
-
-                    if (newPassword && newPassword !== confirmNewPassword) {
-                        alert('New passwords do not match!');
-                        return;
-                    }
-
-                    alert('Profile changes saved successfully! (Frontend simulation)');
-                    // In a real application, you'd send this data to a backend API.
-                    // For now, we just simulate success.
-                    // window.location.href = 'index.html'; // Or redirect to a confirmation page
-                });
-            }
-        });
-    </script>
+    <script src="/local_greeter/public/js/main.js"></script>
+    <script src="/local_greeter/public/js/profile-edit.js"></script>
 </body>
 </html> 

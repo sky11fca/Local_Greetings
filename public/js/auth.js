@@ -6,6 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginMessage = document.getElementById('loginMessage');
     const registerMessage = document.getElementById('registerMessage');
 
+    const setCookie = (name, value, days=7) => {
+        const date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        const expires = `expires=${date.toUTCString()}`;
+        document.cookie = `${name}=${value};${expires};path=/`;
+    }
     const showMessage = (element, message, type = 'error') => {
         if (!element) return;
 
@@ -17,16 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     };
 
-    const handleResponse = async (response) => {
-        const data = await response.json();
-        if(!response.ok) {
-            throw new Error(data.error || 'request failed');
 
-        }
-        return data;
-    }
-
-    const submitForm = async (url, formData, messageElement, successCallback) =>{
+    const submitForm = async (url, formData, messageElement) =>{
         try{
             const response = await fetch(url, {
                 method: 'POST',
@@ -35,14 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify(formData)
             });
-            const data = await handleResponse(response);
+            const data = await response.json();
 
-            if(data.success){
-                successCallback(data);
+            if(!response.ok || !data.success){
+                throw new Error(data.message);
             }
-            else showMessage(messageElement, data.error || "operation failed");
+            return data;
         } catch(error){
             showMessage(messageElement, error.message);
+            return null;
         }
     };
 
@@ -56,21 +55,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 showMessage(loginMessage, "Please enter email and password");
                 return;
             }
-            await submitForm(
+            const result = await submitForm(
                 "/local_greeter/api/index.php?action=login",
                 {
                     email: email.value,
                     password: password.value
                 },
                 loginMessage,
-                (data) =>{
-                    showMessage(loginMessage, "Login successful");
-                    sessionStorage.setItem('user',JSON.stringify(data.data));
-                    setTimeout(() => {
-                        window.location.href = '/local_greeter/app/views/account.html';
-                    }, 1500)
+            );
+
+            if(result.success){
+                showMessage(loginMessage, "Login successful");
+
+                sessionStorage.setItem('username', result.data.username);
+
+                if(result.user){
+                    sessionStorage.setItem('user', JSON.stringify(result.user));
                 }
-            )
+
+                const userData = {
+                    id: result.data.user_id,
+                    username: result.data.username,
+                    email: result.data.email
+                };
+
+                setCookie('userData', JSON.stringify(userData));
+
+                setTimeout(() => {
+                    window.location.href = '/local_greeter/app/views/account.html';
+                }, 1500)
+
+            }
         })
     }
     if(registerForm){
@@ -91,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            await submitForm(
+            const result = await submitForm(
                 "/local_greeter/api/index.php?action=register",
                 {
                     username: username.value,
@@ -99,13 +114,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     password: password.value
                 },
                 registerMessage,
-                (data) =>{
-                    showMessage(registerMessage, "Registration successful");
-                    setTimeout(() => {
-                        window.location.href = '/local_greeter/app/views/login.html';
-                    }, 1500)
-                }
-            )
+
+            );
+
+            if(result?.success){
+                showMessage(registerMessage, "Registration successful");
+                setTimeout(() => {
+                    window.location.href = '/local_greeter/app/views/login.html';
+                }, 1500)
+            }
         })
     }
 });
