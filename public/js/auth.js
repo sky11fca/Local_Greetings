@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerMessage = document.getElementById('registerMessage');
 
     const showMessage = (element, message, type = 'error') => {
-        if(!element) return;
+        if (!element) return;
 
         element.textContent = message;
         element.className = `message-box ${type}`;
@@ -17,130 +17,96 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     };
 
-    const handleApiResponse = async (response, messageElement) => {
-        try{
+    const handleResponse = async (response) => {
+        const data = await response.json();
+        if(!response.ok) {
+            throw new Error(data.error || 'request failed');
 
-            console.log(response);
-
-            const responseData = await response.json();
-            console.log(responseData);
-            if(!responseData.trim()){
-                throw new Error('Empty response');
-            }
-
-            try{
-                const data = JSON.parse(responseData);
-
-                if(data && data.error){
-                    throw new Error(data.error);
-                }
-
-                return data;
-            }catch(error){
-                console.error('Error:', responseData);
-                throw new Error(responseData);
-            }
-        }catch(error){
-            console.error('Error:', error);
-            showMessage(messageElement, 'An error occurred. Please try again.');
-            return null;
         }
+        return data;
     }
 
-    const makeApiCall = async (url, method, body, messageElement) => {
+    const submitForm = async (url, formData, messageElement, successCallback) =>{
         try{
-
-            console.log(url, method, body);
-
             const response = await fetch(url, {
-                method,
+                method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(body)
+                body: JSON.stringify(formData)
             });
+            const data = await handleResponse(response);
 
-
-            if(!response){
-                console.error('Error:', response);
-                throw new Error('Network error', response);
+            if(data.success){
+                successCallback(data);
             }
-
-
-            const data = await handleApiResponse(response, messageElement);
-
-            if(!response.ok){
-                console.error('Error:', data);
-                throw new Error(data.message);
-            }
-
-
-            return data;
-        }catch(error){
-            console.error('Error:', error);
-            showMessage(messageElement, 'An error occurred. Please try again.');
-            return null;
+            else showMessage(messageElement, data.error || "operation failed");
+        } catch(error){
+            showMessage(messageElement, error.message);
         }
-    }
+    };
 
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
+    if(loginForm){
+        loginForm.addEventListener('submit', async (e) =>{
             e.preventDefault();
-            const email = loginForm.email.value;
-            const password = loginForm.password.value;
 
-            if(!email || !password){
-                showMessage(loginMessage, 'Please enter your email and password', 'error');
+            const{email, password} = loginForm;
+
+            if(!email.value  || !password.value){
+                showMessage(loginMessage, "Please enter email and password");
                 return;
             }
-
-           const data = await makeApiCall('/local_greeter/api/auth/login', 'POST', {email, password}, loginMessage);
-
-            if(data.status === "success" && data){
-                showMessage(loginMessage, data.message, 'success');
-                sessionStorage.setItem('user', JSON.stringify(data.data));
-                setTimeout(()=>{
-                    window.location.href = '/local_greeter/account';
-                },1500);
-            }
-        });
+            await submitForm(
+                "/local_greeter/api/index.php?action=login",
+                {
+                    email: email.value,
+                    password: password.value
+                },
+                loginMessage,
+                (data) =>{
+                    showMessage(loginMessage, "Login successful");
+                    sessionStorage.setItem('user',JSON.stringify(data.data));
+                    setTimeout(() => {
+                        window.location.href = '/local_greeter/app/views/account.html';
+                    }, 1500)
+                }
+            )
+        })
     }
-
-    if (registerForm) {
-        registerForm.addEventListener('submit', async (e) => {
+    if(registerForm){
+        registerForm.addEventListener('submit', async (e) =>{
             e.preventDefault();
-            const username = registerForm.username.value;
-            const email = registerForm.email.value;
-            const password = registerForm.password.value;
-            const confirmPassword = registerForm['confirm-password'].value;
-
-            console.log(username, email, password, confirmPassword); //DELETE LATER
-
-
-            if(!username || !email || !password || !confirmPassword){
-                showMessage(registerMessage, 'Please enter your username, email, password and confirm password', 'error');
+            const {username, email, password, 'confirm-password' : confirmPassword} = registerForm;
+            if(!email.value  || !password.value || !confirmPassword.value){
+                showMessage(registerMessage, "Please enter email, password and confirm password");
+                return;
+            }
+            if(password.value !== confirmPassword.value){
+                showMessage(registerMessage, "Passwords do not match");
                 return;
             }
 
-            if (password !== confirmPassword) {
-                showMessage(registerMessage, 'Passwords do not match', 'error');
+            if(password.value.length < 8){
+                showMessage(registerMessage, "Password must be at least 8 characters long");
                 return;
             }
 
-            if(password.length < 6){
-                showMessage(registerMessage, 'Password must be at least 6 characters', 'error');
-                return;
-            }
-
-            const data = await makeApiCall('/local_greeter/api/auth/register', 'POST', {username, email, password}, registerMessage);
-
-            if(data.status === "success"){
-                showMessage(registerMessage, data.message, 'success');
-                setTimeout(()=>{
-                    window.location.href = '/local_greeter/login';
-                },1500);
-            }
-        });
+            await submitForm(
+                "/local_greeter/api/index.php?action=register",
+                {
+                    username: username.value,
+                    email: email.value,
+                    password: password.value
+                },
+                registerMessage,
+                (data) =>{
+                    showMessage(registerMessage, "Registration successful");
+                    setTimeout(() => {
+                        window.location.href = '/local_greeter/app/views/login.html';
+                    }, 1500)
+                }
+            )
+        })
     }
-}); 
+});
+

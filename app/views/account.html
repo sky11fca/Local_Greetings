@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account - Local Greeting</title>
     <base href="/local_greeter/">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/auth.css"> <!-- Reusing auth.css for general layout -->
+    <link rel="stylesheet" href="/local_greeter/public/css/style.css">
+    <link rel="stylesheet" href="/local_greeter/public/css/auth.css"> <!-- Reusing auth.css for general layout -->
 </head>
 <body>
     <header>
         <div class="container">
-            <div class="logo"><a href="index.html">Local Greeting</a></div>
+            <div class="logo"><a href="/local_greeter/app/views/index.html">Local Greeting</a></div>
             <button class="hamburger-menu" aria-label="Toggle Navigation">
                 <span class="bar"></span>
                 <span class="bar"></span>
@@ -19,11 +19,11 @@
             </button>
             <nav class="main-nav">
                 <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="events.html">Events</a></li>
+                    <li><a href="/local_greeter/app/views/index.html">Home</a></li>
+                    <li><a href="/local_greeter/app/views/events.html">Events</a></li>
                 </ul>
                 <!-- New Profile Button -->
-                <a href="account.html" class="btn btn-primary profile-link">Profile</a>
+                <a href="/local_greeter/app/views/account.html" class="btn btn-primary profile-link">Profile</a>
             </nav>
         </div>
     </header>
@@ -39,15 +39,15 @@
                             <p><strong>Email:</strong> <span id="account-email">john.doe@example.com</span></p>
                             <!-- You can add more details here, e.g., joined events, created events -->
                         </div>
-                        <a href="profile.html" class="btn btn-primary btn-block mt-3">Edit Profile</a>
+                        <a href="/local_greeter/app/views/profile.html" class="btn btn-primary btn-block mt-3">Edit Profile</a>
                         <button id="logoutButton" class="btn btn-secondary btn-block mt-3">Log Out</button>
                     </div>
 
                     <div id="logged-out-account-content" class="auth-box" style="display: none;">
                         <h2>Welcome!</h2>
                         <p>Please log in or sign up to view your account details.</p>
-                        <a href="login.html" class="btn btn-primary btn-block mb-3">Log In</a>
-                        <a href="register.html" class="btn btn-secondary btn-block">Sign Up</a>
+                        <a href="/local_greeter/app/views/login.html" class="btn btn-primary btn-block mb-3">Log In</a>
+                        <a href="/local_greeter/app/views/register.html" class="btn btn-secondary btn-block">Sign Up</a>
                     </div>
                 </div>
             </div>
@@ -60,7 +60,7 @@
         </div>
     </footer>
 
-    <script src="/js/main.js"></script>
+    <script src="/local_greeter/public/js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const loggedInContent = document.getElementById('logged-in-account-content');
