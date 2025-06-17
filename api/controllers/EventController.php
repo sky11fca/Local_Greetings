@@ -15,7 +15,8 @@ class EventController
         //header('Content-Type: application/json');
         $result = $this->eventModel->getAllEvents();
         echo json_encode([
-            $result
+            "success" => true,
+            "events" => $result
         ]);
     }
 

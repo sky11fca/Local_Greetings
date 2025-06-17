@@ -11,9 +11,18 @@ class EventModel
 
     public function getAllEvents()
     {
-        $query = "SELECT * FROM Events";
-        $stmt = $this->db->prepare($query);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try
+        {
+            $query = "SELECT * FROM Events ORDER BY start_time ASC";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+        catch(PDOException $e)
+        {
+            echo $e->getMessage();
+        }
+
     }
 //        public function joinEvent($eventId, $userId)
 //    {

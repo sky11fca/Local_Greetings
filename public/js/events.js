@@ -14,8 +14,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function fetchEvents(page, sportType = null) {
         try {
             const offset = (page - 1) * limit;
-            let url = `/api/events?limit=${limit}&offset=${offset}`;
-            
+            //let url = `/api/events?limit=${limit}&offset=${offset}`;
+
+            let url = '/local_greeter/api/index.php?action=getEvents';
+
             // Add tab-specific endpoint
             if (currentTab === 'joined') {
                 url = `/api/events/joined?limit=${limit}&offset=${offset}`;
