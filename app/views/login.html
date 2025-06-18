@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Local Greeting</title>
-    <base href="/local_greeter/">
     <link rel="stylesheet" href="/local_greeter/public/css/style.css">
     <link rel="stylesheet" href="/local_greeter/public/css/auth.css">
 </head>
 <body>
     <header>
         <div class="container">
-            <div class="logo"><a href="index.html">Local Greeting</a></div>
+            <div class="logo"><a href="/local_greeter/app/views/index.html">Local Greeting</a></div>
             <button class="hamburger-menu" aria-label="Toggle Navigation">
                 <span class="bar"></span>
                 <span class="bar"></span>
@@ -19,14 +18,14 @@
             </button>
             <nav class="main-nav">
                 <ul>
-                    <li><a href="index.html">Home Page</a></li>
-                    <li><a href="events.html">Events</a></li>
+                    <li><a href="/local_greeter/app/views/index.html">Home Page</a></li>
+                    <li><a href="/local_greeter/app/views/events.html">Events</a></li>
                 </ul>
                 <!-- Profile Nav Item -->
                 <div class="profile-nav-item">
-                    <a href="account.html" class="btn btn-primary profile-link" id="profile-button">Profile</a>
-                    <a href="account.html" class="profile-pic-link" id="profile-picture-link">
-                        <img src="images/default-profile.png" alt="Profile" class="profile-pic">
+                    <a href="/local_greeter/app/views/account.html" class="btn btn-primary profile-link" id="profile-button">Profile</a>
+                    <a href="/local_greeter/app/views/account.html" class="profile-pic-link" id="profile-picture-link">
+                        <img src="/local_greeter/public/images/default-profile.png" alt="Profile" class="profile-pic">
                     </a>
                 </div>
             </nav>
@@ -50,7 +49,7 @@
                         <a href="#" class="forgot-password">Forgot password?</a>
                         <button type="submit" class="btn btn-primary btn-block">Log In</button>
                     </form>
-                    <p class="auth-switch">Don't have an account? <a href="/local_greeter/register">Register</a></p>
+                    <p class="auth-switch">Don't have an account? <a href="/local_greeter/app/views/register.html">Register</a></p>
                 </div>
             </div>
         </div>
