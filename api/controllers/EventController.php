@@ -92,20 +92,8 @@ class EventController
                     echo json_encode(['success' => false, 'message' => 'Invalid input']);
                 }
 
-                $headers = getallheaders();
-
-                $authHeader = $headers['Authorization'] ?? '';
-                if(empty($authHeader) || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)){
-                    echo json_encode(['success' => false, 'message' => 'Authorization token is required']);
-                }
-
-                $token = $matches[1];
-                $payload = JWT::validate($token);
-                if(!$payload){
-                    echo json_encode(['success' => false, 'message' => 'Invalid or expired token']);
-                }
-
-                $data['user_id'] = $payload['user_id'];
+                $userData = json_decode($_COOKIE['userData'], true);
+                $data['user_id'] = $userData['id'];
 
 
                 $isParticipant = $this->eventModel->isUserParticipant($data['event_id'], $data['user_id']);
@@ -151,18 +139,20 @@ class EventController
             header('Content-Type: application/json');
 
             $data = json_decode(file_get_contents('php://input'), true);
-            if(empty($data['event_id']) || empty($data['user_id'])){
+            if(empty($data['event_id'])){
                 echo json_encode(['success' => false, 'message' => 'Invalid input']);
             }
 
-            $result = $this->eventModel->leaveEvent($data['event_id'], $data['user_id']);
+            $userData = json_decode($_COOKIE['userData'], true);
+            $userId = $userData['id'];
+
+            $result = $this->eventModel->leaveEvent($data['event_id'], $userId);
             if(!$result){
                 echo json_encode(['success' => false, 'message' => 'Error leaving event.']);
             }
             echo json_encode([
                 "success" => true,
                 "message" => "Successfully left event",
-                "event" => $result
             ]);
         } catch (Exception $e){
             http_response_code(400);

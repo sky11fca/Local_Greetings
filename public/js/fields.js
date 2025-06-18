@@ -42,11 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
             fieldCard.classList.add('field-card');
 
             fieldCard.innerHTML = `
-                <img src="${field.image_url || 'images/map.png'}" alt="${field.name}">
+                <img src="/local_greeter/public/images/default-profile.png" alt="${field.name}">
                 <div class="field-card-content">
                     <h3>${field.name}</h3>
-                    <p class="location">Location: ${field.location}</p>
-                    <p class="sport-type">Sport: ${field.sport_type}</p>
+                    <p class="location">Location: ${field.address}</p>
+                    <p class="sport-type">Sport: ${field.type}</p>
                     <p>${field.description || ''}</p>
                     <div class="rating">Rating: ${field.average_rating ? field.average_rating.toFixed(1) : 'N/A'} (${field.review_count || 0} reviews)</div>
                 </div>

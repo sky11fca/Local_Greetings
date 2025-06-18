@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Function to fetch sports fields and populate the dropdown
     async function fetchSportsFields() {
         try {
-            const response = await fetch('/local_greeter/api/index.php?action=getSportsFields');
+            const response = await fetch('/local_greeter/api/index.php?action=listFields');
             const data = await response.json();
 
             if (response.ok) {
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error(data.message);
             }
 
-            return data.field;
+            return data.fields;
 
 
         } catch (error) {
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            console.log(selectedFieldId);
+
 
             const fieldDetails = await getFieldType(selectedFieldId);
             if(!fieldDetails){

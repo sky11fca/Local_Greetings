@@ -59,7 +59,7 @@ class SportsFieldController
         if ($field) {
             echo json_encode([
                 'success' => true,
-                'field' => $field
+                'fields' => $field
             ]);
         } else {
             echo json_encode([

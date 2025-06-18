@@ -110,8 +110,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        console.log(eventId);
-
         try {
             const response = await fetch("/local_greeter/api/index.php?action=joinEvent" , {
                 method: 'POST',
@@ -122,7 +120,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ,
                 body: JSON.stringify({
                     event_id: eventId,
-                    sessions_token: token //PLACEHOLDER solution
                 })
             });
 

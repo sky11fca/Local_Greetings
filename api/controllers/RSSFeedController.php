@@ -29,11 +29,11 @@ class RSSFeedController{
 
             $recipients = $this->rssModel->getRecipients();
             if(empty($recipients)){
-                return[
+                echo json_encode([
                     'success' => true,
                     'message' => 'No recipients found',
                     'email_sent' => false
-                ];
+                ]);
             }
 
             $subject = 'New Sport Event:  ' . $event['title'];
@@ -48,17 +48,17 @@ class RSSFeedController{
             );
 
 
-            return [
+            echo json_encode([
                 'success' => true,
                 'message' => 'RSS feed generated successfully',
                 'email_sent' => $emailSent
-            ];
+            ]);
         } catch(Exception $e){
             http_response_code($e->getCode() ?: 400);
-            return[
+            echo json_encode([
                 'success' => false,
                 'message' => $e->getMessage()
-            ];
+            ]);
         }
     }
 }
