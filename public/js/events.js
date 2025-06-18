@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const token = sessionStorage.getItem('jwt_token');
         if (!token) {
             alert('You must be logged in to join an event.');
-            window.location.href = '/local_greeter/app/views/login.html';
+            window.location.href = '/local_greeter/login';
             return;
         }
 

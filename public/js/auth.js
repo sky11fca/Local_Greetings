@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     email: result.data.email
                 });
                 setTimeout(() => {
-                    window.location.href = '/local_greeter/app/views/account.html';
+                    window.location.href = '/local_greeter/login';
                 }, 1500)
 
             }
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(result?.success){
                 showMessage(registerMessage, "Registration successful");
                 setTimeout(() => {
-                    window.location.href = '/local_greeter/app/views/login.html';
+                    window.location.href = '/local_greeter/login';
                 }, 1500)
             }
         })

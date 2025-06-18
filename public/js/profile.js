@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             updateAccountView();
-            window.location.href = '/local_greeter/app/views/login.html';
+            window.location.href = '/local_greeter/login';
         });
     }
 
@@ -63,6 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const userData = getUserData();
     if(!userData)
     {
-        window.location.href = '/local_greeter/app/views/login.html';
+        window.location.href = '/local_greeter/login';
     }
 });

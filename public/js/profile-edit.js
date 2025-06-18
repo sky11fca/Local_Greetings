@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function populateForm() {
         const userData = getUserData();
         if (!userData) {
-            window.location.href = '/local_greeter/app/views/login.html';
+            window.location.href = '/local_greeter/login';
         }
         const {username, email} = userData;
         profileEditForm.username.value = userData.username || '';
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 setCookie('userData', JSON.stringify(updatedUserData));
 
-                window.location.href = '/local_greeter/app/views/account.html';
+                window.location.href = '/local_greeter/account';
 
 
             } catch (error) {
