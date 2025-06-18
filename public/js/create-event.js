@@ -7,14 +7,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Function to fetch sports fields and populate the dropdown
     async function fetchSportsFields() {
         try {
-            const response = await fetch('/api/fields');
+            const response = await fetch('/local_greeter/api/index.php?action=getSportsFields');
             const data = await response.json();
 
             if (response.ok) {
                 sportsFieldSelect.innerHTML = '<option value="">Select a Sports Field</option>';
                 data.fields.forEach(field => {
                     const option = document.createElement('option');
-                    option.value = field.id;
+                    option.value = field.field_id;
                     option.textContent = field.name + ' - ' + field.address;
                     sportsFieldSelect.appendChild(option);
                 });
@@ -28,6 +28,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    async function getFieldType(fieldId) {
+        try {
+            const response = await fetch("/local_greeter/api/index.php?action=getFieldByID", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'field_id': fieldId
+                })
+            });
+            const data = await response.json();
+
+            if(!data.success){
+                throw new Error(data.message);
+            }
+
+            return data.field;
+
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        }
+    }
+
     // Fetch sports fields when the page loads
     fetchSportsFields();
 
@@ -36,26 +62,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         createEventForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const formData = new FormData(createEventForm);
-            const eventData = {};
-            formData.forEach((value, key) => (eventData[key] = value));
 
             // Get JWT token from local storage
-            const token = localStorage.getItem('jwt_token');
+            const token = sessionStorage.getItem('jwt_token');
             if (!token) {
                 alert('You must be logged in to create an event.');
-                window.location.href = 'login.html';
+                window.location.href = '/local_greeter/app/views/login.html';
                 return;
             }
 
+            const selectedFieldId = createEventForm.sports_field_id.value;
+            if(!selectedFieldId){
+                alert('Please select a sports field');
+                return;
+            }
+
+            console.log(selectedFieldId);
+
+            const fieldDetails = await getFieldType(selectedFieldId);
+            if(!fieldDetails){
+                alert('Failed to get field details');
+                return;
+            }
+
+            const formData = {
+                title: createEventForm.title.value,
+                description: createEventForm.description.value,
+                start_time: createEventForm.start_time.value,
+                end_time: createEventForm.end_time.value,
+                max_participants: createEventForm.max_participants.value,
+                field_id: selectedFieldId,
+                field_type: fieldDetails.type,
+            }
+
             try {
-                const response = await fetch('/api/events', {
+                const response = await fetch('/local_greeter/api/index.php?action=createEvent', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify(eventData),
+                    body: JSON.stringify(formData),
                 });
 
                 const data = await response.json();
@@ -64,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     alert(data.message);
                     createEventForm.reset(); // Clear the form
                     // Optionally redirect to the event details page or events list
-                    window.location.href = 'events.html'; 
+                    window.location.href = '/local_greeter/app/views/events.html';
                 } else {
                     alert(data.error || 'Failed to create event');
                 }

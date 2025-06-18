@@ -20,9 +20,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Add tab-specific endpoint
             if (currentTab === 'joined') {
-                url = `/api/events/joined?limit=${limit}&offset=${offset}`;
+                url = '/local_greeter/api/index.php?action=getJoinedEvents';
             } else if (currentTab === 'created') {
-                url = `/api/events/created?limit=${offset}`;
+                url = `/local_greeter/api/index.php?action=getCreatedEvents`;
             }
             
             if (sportType) {
@@ -38,7 +38,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            const response = await fetch(url, { headers });
+            const options = {
+                headers,
+                method: currentTab === 'joined' || currentTab === 'created' ? 'POST' : 'GET',
+            }
+
+            if(currentTab === 'joined' || currentTab === 'created'){
+                const userData = JSON.parse(sessionStorage.getItem('user'));
+                options.body = JSON.stringify({
+                    user_id: userData.id,
+                });
+            }
+
+
+            const response = await fetch(url, options);
             const data = await response.json();
 
             if (response.ok) {
@@ -66,15 +79,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             eventCard.classList.add('event-card');
             
             eventCard.innerHTML = `
-                <img src="images/football.jpg" alt="${event.title}">
+                <img src="/local_greeter/public/images/default-profile.png" alt="${event.title}">
                 <div class="event-card-content">
                     <h3>${event.title}</h3>
-                    <p class="location">${event.field_address}</p>
+                    <p class="location">${event.address}</p>
                     <p class="date">${new Date(event.start_time).toLocaleDateString()} - ${new Date(event.end_time).toLocaleDateString()}</p>
                     <p class="participants">${event.current_participants}/${event.max_participants} participants</p>
                     ${event.cost > 0 ? `<p class="cost">Cost: $${event.cost.toFixed(2)}</p><p class="cost-per-participant">Cost per participant: $${(event.cost / Math.max(1, event.current_participants)).toFixed(2)}</p>` : '<p class="cost">Cost: Free</p>'}
                     <p>${event.description.substring(0, 100)}...</p>
-                    ${currentTab === 'public' ? `<button class="btn btn-primary join-event-btn" data-event-id="${event.id}">Join Event</button>` : ''}
+                    ${currentTab === 'public' ? `<button class="btn btn-primary join-event-btn" data-event-id="${event.event_id}">Join Event</button>` : ''}
                 </div>
             `;
             eventGrid.appendChild(eventCard);
@@ -90,20 +103,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function joinEvent(eventId, buttonElement) {
-        const token = localStorage.getItem('jwt_token');
+        const token = sessionStorage.getItem('jwt_token');
         if (!token) {
             alert('You must be logged in to join an event.');
-            window.location.href = 'login.html';
+            window.location.href = '/local_greeter/app/views/login.html';
             return;
         }
 
+        console.log(eventId);
+
         try {
-            const response = await fetch(`/api/events/${eventId}/join`, {
+            const response = await fetch("/local_greeter/api/index.php?action=joinEvent" , {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 }
+                ,
+                body: JSON.stringify({
+                    event_id: eventId,
+                    sessions_token: token //PLACEHOLDER solution
+                })
             });
 
             const data = await response.json();

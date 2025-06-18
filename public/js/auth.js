@@ -45,6 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const storeAuthData = (token, userData) =>{
+        sessionStorage.setItem('jwt_token', token);
+        sessionStorage.setItem('user', JSON.stringify(userData));
+
+        setCookie('userData', JSON.stringify(userData));
+    };
+
     if(loginForm){
         loginForm.addEventListener('submit', async (e) =>{
             e.preventDefault();
@@ -67,20 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if(result.success){
                 showMessage(loginMessage, "Login successful");
 
-                sessionStorage.setItem('username', result.data.username);
-
-                if(result.user){
-                    sessionStorage.setItem('user', JSON.stringify(result.user));
-                }
-
-                const userData = {
+                storeAuthData(result.token, {
                     id: result.data.user_id,
                     username: result.data.username,
                     email: result.data.email
-                };
-
-                setCookie('userData', JSON.stringify(userData));
-
+                });
                 setTimeout(() => {
                     window.location.href = '/local_greeter/app/views/account.html';
                 }, 1500)

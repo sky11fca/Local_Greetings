@@ -8,8 +8,6 @@ class UserController {
         $this->userModel = new UserModel($db);
     }
 
-
-
     public function updateUser(){
 
         try{

@@ -84,6 +84,6 @@ class SportsFieldModel
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchColumn();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 } 
