@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const selectedFieldId = createEventForm.sports_field_id.value;
+
             if(!selectedFieldId){
                 alert('Please select a sports field');
                 return;
@@ -109,8 +110,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (response.ok) {
                     alert(data.message);
-                    createEventForm.reset(); // Clear the form
-                    // Optionally redirect to the event details page or events list
+                    createEventForm.reset();
+
+                    //RSS NEWS GENERATION
+
+                    try{
+                        const rssResponse = await fetch('/local_greeter/api/index.php?action=sendRssFeed', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                'event_id': data.event_id,
+                            })
+                        })
+
+                        const rssData = await rssResponse.json();
+                        if(!rssResponse.ok){
+                            console.error('Failed to get rss data');
+                        }
+                    } catch(error) {
+                        console.error('Error:', error);
+                    }
+
                     window.location.href = '/local_greeter/app/views/events.html';
                 } else {
                     alert(data.error || 'Failed to create event');

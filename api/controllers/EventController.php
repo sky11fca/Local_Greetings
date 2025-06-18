@@ -211,6 +211,7 @@ class EventController
             echo json_encode([
                 'success' => true,
                 'message' => 'Event created successfully',
+                'event_id' => $result['event_id'],
             ]);
         }
         catch(Exception $e){
