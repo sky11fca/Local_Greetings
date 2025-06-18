@@ -8,6 +8,7 @@ require_once __DIR__ . '/config/Database.php';
 require_once __DIR__ . '/controllers/AuthController.php';
 require_once __DIR__ . '/controllers/UserController.php';
 require_once __DIR__ . '/controllers/EventController.php';
+require_once __DIR__ . '/controllers/SportsFieldController.php';
 
 header("Content-Type: application/json");
 try{
@@ -18,6 +19,7 @@ try{
     $controller = new AuthController($db);
     $userController = new UserController($db);
     $eventController = new EventController($db);
+    $sportsFieldController = new SportsFieldController($db);
 
     if($_SERVER['REQUEST_METHOD'] === 'POST'){
         //POST Routing
@@ -41,6 +43,9 @@ try{
         switch($endpoint){
             case 'getEvents':
                 $eventController->listEvents();
+                break;
+            case 'listFields':
+                $sportsFieldController->listFields();
                 break;
             default:
                 http_response_code(404);

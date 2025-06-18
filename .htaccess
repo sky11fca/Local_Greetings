@@ -1,0 +1,17 @@
+RewriteEngine On
+
+# Handle clean URLs
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([^/]+)/?$ index.php?page=$1 [L,QSA]
+
+# Handle nested routes like /events/create
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([^/]+)/([^/]+)/?$ index.php?page=$1&action=$2 [L,QSA]
+
+# Redirect /local_greeter/ to /local_greeter
+RewriteRule ^local_greeter/$ /local_greeter [R=301,L]
+
+# Ensure API requests go to the API folder
+RewriteRule ^api/(.*)$ api/index.php?$1 [L,QSA] 

@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 offset: (currentPage - 1) * limit,
                 ...filters
             });
-            const response = await fetch(`index.php?action=listFields&${params.toString()}`);
+            const response = await fetch(`/local_greeter/api/index.php?action=listFields&${params.toString()}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const radius = radiusFilter.value;
 
         if (searchQuery) {
-            filters.location = searchQuery;
+            filters.search = searchQuery;
         }
         if (sportType) {
             filters.sport_type = sportType;
