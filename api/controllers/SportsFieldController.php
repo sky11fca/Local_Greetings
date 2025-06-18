@@ -48,4 +48,24 @@ class SportsFieldController
             echo json_encode(['success' => false, 'message' => 'Sports field not found.']);
         }
     }
+
+    public function getFieldById()
+    {
+        header('Content-Type: application/json');
+        $data = json_decode(file_get_contents('php://input'), true);
+        $fieldId = $data['field_id'];
+
+        $field = $this->sportsFieldModel->getFieldById($fieldId);
+        if ($field) {
+            echo json_encode([
+                'success' => true,
+                'field' => $field
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Sports field not found.'
+            ]);
+        }
+    }
 } 

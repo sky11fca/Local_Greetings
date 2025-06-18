@@ -2,6 +2,7 @@
 
 
 require_once __DIR__ . '/../models/UserModel.php';
+require_once __DIR__ . '/../config/JWT.php';
 
 class AuthController
 {
@@ -27,8 +28,17 @@ class AuthController
                 throw new Exception('Invalid credentials');
             }
 
+            $token = JWT::generate([
+                'user_id' => $user['user_id'],
+                'username' => $user['username'],
+                'email' => $user['email'],
+            ]);
+
+            http_response_code(200);
+
             echo json_encode([
                 'success' => true,
+                'token' => $token,
                 'data' => [
                     "user_id" => $user['user_id'],
                     "username" => $user['username'],
@@ -65,6 +75,35 @@ class AuthController
         }catch(Exception $e){
             http_response_code($e->getCode() ?: 400);
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function validateToken(){
+        try{
+            $headers = getallheaders();
+            $authHeader = $headers['Authorization'] ?? '';
+
+            if (empty($authHeader) || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+                throw new Exception('Authorization token is required', 401);
+            }
+
+            $token = $matches[1];
+            $payload = JWT::validate($token);
+
+            if (!$payload) {
+                throw new Exception('Invalid or expired token', 401);
+            }
+
+            echo json_encode([
+                'success' => true,
+                'user' => $payload
+            ]);
+        }catch (Exception $e) {
+            http_response_code($e->getCode() ?: 401);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
         }
     }
 }

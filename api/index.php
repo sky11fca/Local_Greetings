@@ -30,16 +30,31 @@ try{
             case 'login':
                 $controller->login();
                 break;
-
-
-                default:
+            case 'joinEvent':
+                $eventController->joinEvent();
+                break;
+            case 'getJoinedEvents':
+                $eventController->listJoinedEvents();
+                break;
+            case 'createEvent':
+                $eventController->createEvent();
+                break;
+            case 'sendRssFeed':
+                $rssController->generateAndNotify();
+                break;
+            case 'getFieldByID':
+                $sportsFieldController->getFieldById();
+                break;
+            case 'getCreatedEvents':
+                $eventController->listCreatedEvents();
+                break;
+            default:
                 http_response_code(404);
                 echo json_encode(['success' => false, 'message' => 'API endpoint not found']);
         }
     }
     else if($_SERVER['REQUEST_METHOD'] === 'GET')
     {
-        //GET Methods will be added soon
         switch($endpoint){
             case 'getEvents':
                 $eventController->listEvents();
@@ -50,9 +65,7 @@ try{
             default:
                 http_response_code(404);
                 echo json_encode(['success' => false, 'message' => 'API endpoint not found']);
-
         }
-
     }
     else if($_SERVER['REQUEST_METHOD'] === 'PUT'){
        switch($endpoint){
@@ -63,6 +76,16 @@ try{
                 http_response_code(404);
                 echo json_encode(['success' => false, 'message' => 'API endpoint not found']);
        }
+    }
+    else if($_SERVER['REQUEST_METHOD']==='DELETE'){
+        switch ($endpoint){
+            case 'leaveEvent':
+                $eventController->leaveEvent();
+                break;
+            default:
+                http_response_code(404);
+                echo json_encode(['success' => false, 'message' => 'API endpoint not found']);
+        }
     }
     else
     {
