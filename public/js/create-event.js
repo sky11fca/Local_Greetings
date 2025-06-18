@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         console.error('Error:', error);
                     }
 
-                    window.location.href = '/local_greeter/app/views/events.html';
+                    window.location.href = '/local_greeter/events';
                 } else {
                     alert(data.error || 'Failed to create event');
                 }
