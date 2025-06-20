@@ -48,6 +48,8 @@ try{
                 $sportsFieldController->getFieldById();
                 break;
             case 'getCreatedEvents':
+                $regex = $_GET['regex'] ?? '';
+                $sportType = $_GET['sport_type'] ?? '';
                 $eventController->listCreatedEvents();
                 break;
             default:
@@ -62,7 +64,7 @@ try{
                 $eventController->listEvents();
                 break;
             case 'listFields':
-                $sportsFieldController->listFields();
+                $sportsFieldController->searchFields();
                 break;
             default:
                 http_response_code(404);

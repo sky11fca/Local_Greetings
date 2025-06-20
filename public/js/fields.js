@@ -11,11 +11,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchSportsFields(filters = {}) {
         try {
-            const params = new URLSearchParams({
-                limit: limit,
-                offset: (currentPage - 1) * limit,
-                ...filters
-            });
+            const params = new URLSearchParams();
+
+            if (filters.search) {
+                params.append('search', filters.search);
+            }
+            if(filters.sport_type){
+                params.append('sport_type', filters.sport_type);
+            }
+
             const response = await fetch(`/local_greeter/api/index.php?action=listFields&${params.toString()}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -95,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const filters = {};
         const searchQuery = searchField.value.trim();
         const sportType = sportTypeFilter.value;
-        const radius = radiusFilter.value;
+        //const radius = radiusFilter.value;
 
         if (searchQuery) {
             filters.search = searchQuery;
@@ -103,9 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sportType) {
             filters.sport_type = sportType;
         }
-        if (radius) {
-            filters.radius = radius;
-        }
+        // if (radius) {
+        //     filters.radius = radius;
+        // }
 
         currentPage = 1; // Reset to first page on new filter
         fetchSportsFields(filters);

@@ -28,7 +28,7 @@ include __DIR__ . '/../templates/header.php';
                     <option value="football">Football</option>
                     <option value="basketball">Basketball</option>
                     <option value="tennis">Tennis</option>
-                    <option value="yoga">Yoga</option>
+                    <option value="volleyball">Volleyball</option>
                 </select>
                 <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
             </div>

@@ -27,9 +27,20 @@ class SportsFieldModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function searchFields($searchQuery, $sportType, $radius, $limit, $offset)
+    public function searchFields($searchQuery=null, $sportType=null)
     {
-        $sql = "SELECT field_id, name, address, ST_Y(location) AS latitude, ST_X(location) AS longitude, type, amenities, opening_hours, is_public FROM SportsFields WHERE 1=1";
+        $sql = "SELECT 
+                    field_id, 
+                    name, 
+                    address, 
+                    ST_Y(location) AS latitude, 
+                    ST_X(location) AS longitude, 
+                    type, 
+                    amenities, 
+                    opening_hours, 
+                    is_public 
+FROM SportsFields 
+WHERE 1=1";
         $params = [];
 
         if ($searchQuery) {
@@ -44,9 +55,9 @@ class SportsFieldModel
         // Radius filtering would require more complex spatial queries and potentially user's current location
         // For simplicity, we'll skip radius filtering here unless specific coordinates are provided
 
-        $sql .= " LIMIT ? OFFSET ?";
-        $params[] = $limit;
-        $params[] = $offset;
+//        $sql .= " LIMIT ? OFFSET ?";
+//        $params[] = $limit;
+//        $params[] = $offset;
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);

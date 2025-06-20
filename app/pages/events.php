@@ -35,8 +35,8 @@ include __DIR__ . '/../templates/header.php';
                     <option value="">All Sport Types</option>
                     <option value="football">Football</option>
                     <option value="basketball">Basketball</option>
+                    <option value="volleyball">Volleyball</option>
                     <option value="tennis">Tennis</option>
-                    <option value="yoga">Yoga</option>
                     <!-- More options can be added dynamically -->
                 </select>
                 <button class="btn btn-primary" id="apply-filters">Apply Filters</button>

@@ -37,9 +37,38 @@ class SportsFieldController
         ]);
     }
 
+
+
+    public function searchFields()
+    {
+
+        $searchQuery = $_GET['search'] ?? '';
+        $sportType = $_GET['sport_type'] ?? '';
+
+        header('Content-Type: application/json');
+        $fields = $this->sportsFieldModel->searchFields($searchQuery, $sportType);
+
+        if($fields){
+            echo json_encode([
+                'success' => true,
+                'fields' => $fields
+            ]);
+        }else{
+            echo json_encode([
+                'success' => false,
+                'message' => 'No fields found.'
+            ]);
+        }
+
+    }
     public function getField($fieldId)
     {
+
+
         header('Content-Type: application/json');
+
+
+
         $field = $this->sportsFieldModel->getFieldById($fieldId);
         if ($field) {
             echo json_encode(['success' => true, 'field' => $field]);

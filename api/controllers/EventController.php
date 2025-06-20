@@ -14,11 +14,25 @@ class EventController
     public function listEvents()
     {
         header('Content-Type: application/json');
-        $result = $this->eventModel->getAllEvents();
-        echo json_encode([
-            "success" => true,
-            "events" => $result
-        ]);
+        try{
+            $searchQuery = isset($_GET['search']) ? $_GET['search'] : '';
+            $sportType = isset($_GET['sport_type']) ? $_GET['sport_type'] : '';
+
+
+            $result = $this->eventModel->getAllEvents($searchQuery, $sportType);
+
+            echo json_encode([
+                "success" => true,
+                "events" => $result
+            ]);
+        } catch(Exception $e){
+            http_response_code($e->getCode() ?: 400);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+
     }
 
     public function listJoinedEvents()
@@ -27,12 +41,13 @@ class EventController
 
         try{
             $data = json_decode(file_get_contents('php://input'), true);
-
+            $searchQuery = isset($_GET['search']) ? $_GET['search'] : '';
+            $sportType = isset($_GET['sport_type']) ? $_GET['sport_type'] : '';
             if(empty($data['user_id'])){
                 echo json_encode(['success' => false, 'message' => 'Invalid input']);
             }
 
-            $result = $this->eventModel->getJoinedEvents($data['user_id']);
+            $result = $this->eventModel->getJoinedEvents($data['user_id'], $searchQuery, $sportType);
 
             if(!$result){
                 echo json_encode(['success' => false, 'message' => 'Error fetching joined events.']);
@@ -56,12 +71,13 @@ class EventController
 
         try{
             $data = json_decode(file_get_contents('php://input'), true);
-
+            $searchQuery = isset($_GET['search']) ? $_GET['search'] : '';
+            $sportType = isset($_GET['sport_type']) ? $_GET['sport_type'] : '';
             if(empty($data['user_id'])){
                 echo json_encode(['success' => false, 'message' => 'Invalid input']);
             }
 
-            $result = $this->eventModel->getCreatedEvents($data['user_id']);
+            $result = $this->eventModel->getCreatedEvents($data['user_id'], $searchQuery, $sportType);
 
             if(!$result){
                 echo json_encode(['success' => false, 'message' => 'Error fetching joined events.']);

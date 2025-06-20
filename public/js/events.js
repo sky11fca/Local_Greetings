@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const eventGrid = document.querySelector('#events-list .event-grid');
     const sportTypeFilter = document.getElementById('sport-type-filter');
     const applyFiltersButton = document.getElementById('apply-filters');
+    const searchInput = document.getElementById('search-event');
     const paginationDiv = document.querySelector('.pagination');
     const tabButtons = document.querySelectorAll('.tab-btn');
 
@@ -11,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentPage = 1;
     let currentTab = 'public';
 
-    async function fetchEvents(page, sportType = null) {
+    async function fetchEvents(page, searchQuery=null ,sportType = null) {
         try {
             const offset = (page - 1) * limit;
             //let url = `/api/events?limit=${limit}&offset=${offset}`;
@@ -24,10 +25,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else if (currentTab === 'created') {
                 url = `/local_greeter/api/index.php?action=getCreatedEvents`;
             }
-            
+
+            const params = new URLSearchParams();
             if (sportType) {
-                url += `&sport_type=${sportType}`;
+                params.append('sport_type', sportType);
             }
+            if (searchQuery) {
+                params.append('search', searchQuery);
+            }
+
+            url += `&${params.toString()}`;
 
             const token = localStorage.getItem('jwt_token');
             const headers = {
@@ -156,7 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             button.addEventListener('click', () => {
                 currentPage = i;
-                fetchEvents(currentPage, sportTypeFilter.value);
+                fetchEvents(currentPage, searchInput.value, sportTypeFilter.value);
             });
             paginationDiv.appendChild(button);
         }
@@ -174,15 +181,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentPage = 1;
             
             // Fetch events for the selected tab
-            fetchEvents(currentPage, sportTypeFilter.value);
+            fetchEvents(currentPage, searchInput.value ,sportTypeFilter.value);
         });
     });
 
     applyFiltersButton.addEventListener('click', () => {
         currentPage = 1;
-        fetchEvents(currentPage, sportTypeFilter.value);
+        fetchEvents(currentPage, searchInput.value, sportTypeFilter.value);
     });
 
     // Initial fetch
-    fetchEvents(currentPage);
+    fetchEvents(currentPage, searchInput.value, sportTypeFilter.value);
 }); 
