@@ -9,7 +9,7 @@ class EventModel
         $this->db = $db;
     }
 
-    public function getAllEvents()
+    public function getAllEvents($searchQuery = null, $sportType = null)
     {
             $query = "SELECT 
         e.event_id,
@@ -24,17 +24,31 @@ class EventModel
         e.current_participants,
         e.status,
         e.created_at
-    FROM Events e 
-    JOIN Users u on e.organizer_id = u.user_id
-    JOIN SportsFields sf ON e.field_id = sf.field_id
-    ORDER BY e.start_time ASC";
+        FROM Events e 
+        JOIN Users u on e.organizer_id = u.user_id
+        JOIN SportsFields sf ON e.field_id = sf.field_id
+        WHERE 1=1";
+
+            $params = [];
+
+            if($searchQuery){
+                $query .= " AND (e.title LIKE :search OR e.description LIKE :search)";
+                $params['search'] = '%' . $searchQuery . '%';
+            }
+
+            if($sportType){
+                $query .= " AND e.sport_type = :sport_type";
+                $params['sport_type'] = $sportType;
+            }
+
+            $query .= " ORDER BY e.start_time ASC";
             $stmt = $this->db->prepare($query);
-            $stmt->execute();
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     }
 
-    public function getJoinedEvents($userId)
+    public function getJoinedEvents($userId, $searchQuery = null, $sportType = null)
     {
         $query = "SELECT 
         e.event_id,
@@ -53,14 +67,32 @@ class EventModel
     FROM Events e 
     JOIN Users u on e.organizer_id = u.user_id
     JOIN SportsFields sf ON e.field_id = sf.field_id
-    WHERE e.event_id IN ( SELECT event_id FROM EventParticipants WHERE user_id = :user_id AND status = 'confirmed')
-    ORDER BY e.start_time ASC";
+    WHERE e.event_id IN ( SELECT event_id FROM EventParticipants WHERE user_id = :user_id AND status = 'confirmed')";
+
+        $params = ['user_id' => $userId];
+
+        if($searchQuery){
+            $query .= " AND (e.title LIKE :search OR e.description LIKE :search)";
+            $params['search'] = '%' . $searchQuery . '%';
+        }
+
+        if($sportType){
+            $query .= " AND e.sport_type = :sport_type";
+            $params['sport_type'] = $sportType;
+        }
+
+        $query .= " ORDER BY e.start_time ASC";
+
+
+
+
+
         $stmt = $this->db->prepare($query);
-        $stmt->execute(["user_id" => $userId]);;
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getCreatedEvents($userId){
+    public function getCreatedEvents($userId, $searchQuery = null, $sportType = null){
         $query = "SELECT 
         e.event_id,
         e.title,
@@ -78,10 +110,24 @@ class EventModel
     FROM Events e 
     JOIN Users u on e.organizer_id = u.user_id
     JOIN SportsFields sf ON e.field_id = sf.field_id
-    WHERE e.organizer_id = :user_id
-    ORDER BY e.start_time ASC";
+    WHERE e.organizer_id = :user_id";
+
+        $params = ['user_id' => $userId];
+
+        if($searchQuery){
+            $query .= " AND (e.title LIKE :search OR e.description LIKE :search)";
+            $params['search'] = '%' . $searchQuery . '%';
+        }
+
+        if($sportType){
+            $query .= " AND e.sport_type = :sport_type";
+            $params['sport_type'] = $sportType;
+        }
+
+        $query .= " ORDER BY e.start_time ASC";
+
         $stmt = $this->db->prepare($query);
-        $stmt->execute(["user_id" => $userId]);;
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

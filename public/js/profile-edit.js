@@ -19,7 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!userData) return null;
 
         try{
-            return JSON.parse(userData);
+            const base64Payload = userData.split('.')[1];
+            const payload = atob(base64Payload);
+            console.log(payload);
+            return JSON.parse(payload);
         }catch(e)
         {
             console.error(e);
@@ -57,7 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const userData = getUserData();
 
-            if(!userData || !userData.id)
+            console.log(userData);
+
+            if(!userData || !userData.user_id)
             {
                 alert('Failed to update profile');
                 return;
@@ -70,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        'user_id': userData.id,
+                        'user_id': userData.user_id,
                         'username': formData.username || userData.username,
                         'email': formData.email || userData.email,
                         'password': formData.newPassword || undefined
@@ -83,12 +88,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error('Failed to update profile');
                 }
 
-                const updatedUserData = {
-                    id: userData.id,
-                    username: formData.username,
-                    email: formData.email,
-                };
-                setCookie('userData', JSON.stringify(updatedUserData));
+                if(result.token){
+                    setCookie('userData', result.token);
+                }
+
+                if(getCookie('userDataPersist')){
+                    const userData = {
+                        id: result.data.user_id,
+                        username: result.data.username,
+                        email: result.data.email
+                    }
+
+                    setCookie('userDataPersist', JSON.stringify(userData), 30);
+                }
 
                 window.location.href = '/local_greeter/account';
 

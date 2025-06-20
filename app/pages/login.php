@@ -47,8 +47,16 @@ include __DIR__ . '/../templates/header.php';
                         <label for="password">Password</label>
                         <input type="password" id="password" name="password" placeholder="Password" required>
                     </div>
+
                     <a href="#" class="forgot-password">Forgot password?</a>
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember-me" name="remember-me">
+                        <label for="remember-me">Remember me</label>
+                    </div>
+
                     <button type="submit" class="btn btn-primary btn-block">Log In</button>
+
+
                 </form>
                 <p class="auth-switch">Don't have an account? <a href="/local_greeter/register">Register</a></p>
             </div>

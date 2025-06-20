@@ -48,6 +48,7 @@ class SportsFieldController
     public function getField($fieldId)
     {
         header('Content-Type: application/json');
+
         $field = $this->sportsFieldModel->getFieldById($fieldId);
         if ($field) {
             echo json_encode(['success' => true, 'field' => $field]);
@@ -67,7 +68,7 @@ class SportsFieldController
         if ($field) {
             echo json_encode([
                 'success' => true,
-                'field' => $field
+                'fields' => $field
             ]);
         } else {
             echo json_encode([

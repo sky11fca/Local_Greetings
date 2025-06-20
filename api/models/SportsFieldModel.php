@@ -40,7 +40,18 @@ class SportsFieldModel
 
     public function searchFields($searchQuery, $sportType, $limit, $offset)
     {
-        $sql = "SELECT field_id, name, address, ST_Y(location) AS latitude, ST_X(location) AS longitude, type, amenities, opening_hours, is_public FROM SportsFields WHERE 1=1";
+        $sql = "SELECT 
+                    field_id, 
+                    name, 
+                    address, 
+                    ST_Y(location) AS latitude, 
+                    ST_X(location) AS longitude, 
+                    type, 
+                    amenities, 
+                    opening_hours, 
+                    is_public 
+FROM SportsFields 
+WHERE 1=1";
         $params = [];
 
         if ($searchQuery) {

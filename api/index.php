@@ -58,6 +58,8 @@ try{
                 $sportsFieldController->getFieldById();
                 break;
             case 'getCreatedEvents':
+                $regex = $_GET['regex'] ?? '';
+                $sportType = $_GET['sport_type'] ?? '';
                 $eventController->listCreatedEvents();
                 break;
             default:
@@ -78,7 +80,7 @@ try{
                 $eventController->listPastEvents();
                 break;
             case 'listFields':
-                $sportsFieldController->listFields();
+                $sportsFieldController->searchFields();
                 break;
             case 'getSportsFields':
                 $sportsFieldController->listAllFieldsSimple();

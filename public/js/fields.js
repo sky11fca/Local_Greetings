@@ -10,11 +10,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchSportsFields(filters = {}) {
         try {
+            const offset = (currentPage - 1) * limit;
             const params = new URLSearchParams({
                 limit: limit,
-                offset: (currentPage - 1) * limit,
-                ...filters
+                offset: offset
             });
+
+            if (filters.search) {
+                params.append('search', filters.search);
+            }
+            if(filters.sport_type){
+                params.append('sport_type', filters.sport_type);
+            }
+
             const response = await fetch(`/local_greeter/api/index.php?action=listFields&${params.toString()}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -81,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             fieldCard.innerHTML = `
-                <img src="${imageUrl}" alt="${field.name}">
+                <img src="/local_greeter/public/${imageUrl}" alt="${field.name}">
                 <div class="field-card-content">
                     <h3>${field.name}</h3>
                     <p class="location">Address: ${field.address || 'N/A'}</p>

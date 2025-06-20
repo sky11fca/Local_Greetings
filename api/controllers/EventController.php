@@ -77,59 +77,61 @@ class EventController
     public function listJoinedEvents()
     {
         header('Content-Type: application/json');
-
-        try{
-            $data = json_decode(file_get_contents('php://input'), true);
-
-            if(empty($data['user_id'])){
-                echo json_encode(['success' => false, 'message' => 'Invalid input']);
+        try {
+            $token = $this->getBearerToken();
+            if (!$token) {
+                throw new Exception('Authorization token not found or invalid', 401);
             }
 
-            $result = $this->eventModel->getJoinedEvents($data['user_id']);
-
-            if(!$result){
-                echo json_encode(['success' => false, 'message' => 'Error fetching joined events.']);
+            $payload = JWT::validate($token);
+            if (!$payload) {
+                throw new Exception('Invalid or expired token', 401);
             }
-            http_response_code(200);
+
+            $userId = $payload['user_id'];
+            $searchQuery = isset($_GET['search']) ? htmlspecialchars(strip_tags($_GET['search'])) : '';
+            $sportType = isset($_GET['sport_type']) ? htmlspecialchars(strip_tags($_GET['sport_type'])) : '';
+
+            $events = $this->eventModel->getJoinedEvents($userId, $searchQuery, $sportType);
+
             echo json_encode([
                 "success" => true,
-                "events" => $result
+                "events" => $events
             ]);
-        }catch(Exception $e){
-            http_response_code($e->getCode() ?: 400);
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+        } catch (Exception $e) {
+            $statusCode = is_int($e->getCode()) && $e->getCode() >= 400 ? $e->getCode() : 500;
+            http_response_code($statusCode);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
     public function listCreatedEvents()
     {
         header('Content-Type: application/json');
-
-        try{
-            $data = json_decode(file_get_contents('php://input'), true);
-
-            if(empty($data['user_id'])){
-                echo json_encode(['success' => false, 'message' => 'Invalid input']);
+        try {
+            $token = $this->getBearerToken();
+            if (!$token) {
+                throw new Exception('Authorization token not found or invalid', 401);
             }
 
-            $result = $this->eventModel->getCreatedEvents($data['user_id']);
-
-            if(!$result){
-                echo json_encode(['success' => false, 'message' => 'Error fetching joined events.']);
+            $payload = JWT::validate($token);
+            if (!$payload) {
+                throw new Exception('Invalid or expired token', 401);
             }
-            http_response_code(200);
+
+            $userId = $payload['user_id'];
+            $searchQuery = isset($_GET['search']) ? htmlspecialchars(strip_tags($_GET['search'])) : '';
+            $sportType = isset($_GET['sport_type']) ? htmlspecialchars(strip_tags($_GET['sport_type'])) : '';
+            
+            $events = $this->eventModel->getCreatedEvents($userId, $searchQuery, $sportType);
+
             echo json_encode([
                 "success" => true,
-                "events" => $result
+                "events" => $events
             ]);
-        }catch(Exception $e){
-            http_response_code($e->getCode() ?: 400);
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+        } catch (Exception $e) {
+            $statusCode = is_int($e->getCode()) && $e->getCode() >= 400 ? $e->getCode() : 500;
+            http_response_code($statusCode);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
