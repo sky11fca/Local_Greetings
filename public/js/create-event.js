@@ -4,6 +4,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     const createEventForm = document.getElementById('createEventForm');
     const sportsFieldSelect = document.getElementById('sports_field_id');
 
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function getUserData(){
+        const token = getCookie('userData');
+        if(!token){
+            return null;
+        }
+        try{
+            const userData = JSON.parse(atob(token.split('.')[1]));
+            return userData.user_id;
+        }catch(e){
+            console.error(e);
+            return null;
+        }
+
+    }
+
     // Function to fetch sports fields and populate the dropdown
     async function fetchSportsFields() {
         try {
@@ -62,10 +83,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         createEventForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-
+            // TODO: Replace with jwt token cookie
             // Get JWT token from local storage
-            const token = sessionStorage.getItem('jwt_token');
-            if (!token) {
+            // const token = sessionStorage.getItem('jwt_token');
+            // if (!token) {
+
+            // }
+
+            const userId = getUserData();
+            if(!userId){
                 alert('You must be logged in to create an event.');
                 window.location.href = '/local_greeter/login';
                 return;
@@ -96,12 +122,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 field_type: fieldDetails.type,
             }
 
+            formData.user_id = userId;
+
+            console.log(formData);
+
             try {
                 const response = await fetch('/local_greeter/api/index.php?action=createEvent', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        //'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(formData),
                 });
@@ -119,7 +149,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
+                                //'Authorization': `Bearer ${token}`
                             },
                             body: JSON.stringify({
                                 'event_id': data.event_id,

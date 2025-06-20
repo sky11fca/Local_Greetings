@@ -104,12 +104,10 @@ class EventController
 
                 $data = json_decode(file_get_contents('php://input'), true);
 
-                if(empty($data['event_id'])){
+                if(empty($data['event_id']) || empty($data['user_id'])){
                     echo json_encode(['success' => false, 'message' => 'Invalid input']);
                 }
 
-                $userData = json_decode($_COOKIE['userData'], true);
-                $data['user_id'] = $userData['id'];
 
 
                 $isParticipant = $this->eventModel->isUserParticipant($data['event_id'], $data['user_id']);
@@ -155,14 +153,14 @@ class EventController
             header('Content-Type: application/json');
 
             $data = json_decode(file_get_contents('php://input'), true);
-            if(empty($data['event_id'])){
+            if(empty($data['event_id']) || empty($data['user_id'])){
                 echo json_encode(['success' => false, 'message' => 'Invalid input']);
             }
 
-            $userData = json_decode($_COOKIE['userData'], true);
-            $userId = $userData['id'];
+            //$userData = json_decode($_COOKIE['userData'], true);
+            //$userId = $userData['id'];
 
-            $result = $this->eventModel->leaveEvent($data['event_id'], $userId);
+            $result = $this->eventModel->leaveEvent($data['event_id'], $data['user_id']);
             if(!$result){
                 echo json_encode(['success' => false, 'message' => 'Error leaving event.']);
             }
@@ -187,10 +185,10 @@ class EventController
         try{
             $data = json_decode(file_get_contents('php://input'), true);
 
-            $userData = json_decode($_COOKIE['userData'], true);
+            //$userData = json_decode($_COOKIE['userData'], true);
 
 
-            $organizerId = $userData['id'];
+            $organizerId = $data['user_id'];
             $requiredFields = ['title', 'description', 'field_id', 'end_time', 'start_time', 'max_participants'];
 
             foreach($requiredFields as $field){

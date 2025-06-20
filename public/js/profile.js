@@ -14,7 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!userData) return null;
 
         try{
-            return JSON.parse(userData);
+            const base64Payload = userData.split('.')[1];
+            const payload = atob(base64Payload);
+            return JSON.parse(payload);
         }catch(e)
         {
             console.error(e);

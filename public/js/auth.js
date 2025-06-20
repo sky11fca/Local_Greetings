@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginMessage = document.getElementById('loginMessage');
     const registerMessage = document.getElementById('registerMessage');
 
-    const setCookie = (name, value, days=7) => {
+    const setCookie = (name, value, days=1) => {
         const date = new Date();
         date.setTime(date.getTime() + (days*24*60*60*1000));
         const expires = `expires=${date.toUTCString()}`;
@@ -46,10 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const storeAuthData = (token, userData) =>{
-        sessionStorage.setItem('jwt_token', token);
-        sessionStorage.setItem('user', JSON.stringify(userData));
+        const rememberMe = document.getElementById('remember-me');
+        //sessionStorage.setItem('jwt_token', token);
+        setCookie('userData', token);
+        if(rememberMe.checked){
+            setCookie('userDataPersist', JSON.stringify(userData), 30);
+        }
 
-        setCookie('userData', JSON.stringify(userData));
     };
 
     if(loginForm){
@@ -80,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     email: result.data.email
                 });
                 setTimeout(() => {
-                    window.location.href = '/local_greeter/login';
+                    window.location.href = '/local_greeter/home';
                 }, 1500)
 
             }

@@ -12,6 +12,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentPage = 1;
     let currentTab = 'public';
 
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function getUserData(){
+        const token = getCookie('userData');
+        if(!token){
+            return null;
+        }
+        try{
+            const userData = JSON.parse(atob(token.split('.')[1]));
+            return userData.user_id;
+        }catch(e){
+            console.error(e);
+            return null;
+        }
+
+    }
     async function fetchEvents(page, searchQuery=null ,sportType = null) {
         try {
             const offset = (page - 1) * limit;
@@ -51,9 +71,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             if(currentTab === 'joined' || currentTab === 'created'){
-                const userData = JSON.parse(sessionStorage.getItem('user'));
+                const userId = getUserData();
                 options.body = JSON.stringify({
-                    user_id: userData.id,
+                    user_id: userId,
                 });
             }
 
@@ -110,8 +130,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function joinEvent(eventId, buttonElement) {
-        const token = sessionStorage.getItem('jwt_token');
-        if (!token) {
+        // const token = sessionStorage.getItem('jwt_token');
+        // if (!token) {
+
+        // }
+
+        const userId = getUserData();
+        if(!userId){
             alert('You must be logged in to join an event.');
             window.location.href = '/local_greeter/login';
             return;
@@ -127,6 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ,
                 body: JSON.stringify({
                     event_id: eventId,
+                    user_id: userId,
                 })
             });
 

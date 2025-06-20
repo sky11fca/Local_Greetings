@@ -28,10 +28,19 @@ class UserController {
             );
 
             if($rowcount){
+                $updatedUserData = [
+                    'user_id' => $user['user_id'],
+                    'username' => $data['username'] ?? $user['username'],
+                    'email' => $data['email'] ?? $user['email'],
+                ];
+
+                $newToken = JWT::generate($updatedUserData);
+
                 http_response_code(200);
                 echo json_encode([
                     'success' => true,
-                    'message' => 'User updated successfully'
+                    'message' => 'User updated successfully',
+                    'token' => $newToken,
                 ]);
             }
             else{

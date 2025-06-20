@@ -3,7 +3,7 @@ class JWT{
     private static $secretKey = "4kL/QMq4iO99vYxhetbVh+uu606R+DzJu1j+yAqb5iQ=";
     private static $algorithm = "HS256";
 
-    public static function generate(array $payload, int $expiry = 3600): string
+    public static function generate(array $payload, int $expiry = 3600 * 24): string //1 day
     {
      $header = json_encode([
          'typ' => 'JWT',
@@ -52,6 +52,6 @@ class JWT{
     }
     private static function base64UrlDecode(string $data): string {
         $padded = str_pad($data, strlen($data) % 4, '=', STR_PAD_RIGHT);
-        return base64_decode(str_replace(['-', '_'], ['+', '/'], $padded));
+        return base64_decode(str_replace(['-', '_', ''], ['+', '/', '='], $padded));
     }
 }
