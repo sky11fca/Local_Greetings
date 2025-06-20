@@ -4,6 +4,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/config/Database.php';
 require_once __DIR__ . '/controllers/AuthController.php';
 require_once __DIR__ . '/controllers/UserController.php';
@@ -41,6 +42,15 @@ try{
             case 'createEvent':
                 $eventController->createEvent();
                 break;
+            case 'updateEvent':
+                $eventController->updateEvent();
+                break;
+            case 'deleteEvent':
+                $eventController->deleteEvent();
+                break;
+            case 'leaveEvent':
+                $eventController->leaveEvent();
+                break;
             case 'sendRssFeed':
                 $rssController->generateAndNotify();
                 break;
@@ -61,8 +71,17 @@ try{
             case 'getEvents':
                 $eventController->listEvents();
                 break;
+            case 'getEvent':
+                $eventController->getEvent();
+                break;
+            case 'getPastEvents':
+                $eventController->listPastEvents();
+                break;
             case 'listFields':
                 $sportsFieldController->listFields();
+                break;
+            case 'getSportsFields':
+                $sportsFieldController->listAllFieldsSimple();
                 break;
             default:
                 http_response_code(404);
@@ -81,9 +100,6 @@ try{
     }
     else if($_SERVER['REQUEST_METHOD']==='DELETE'){
         switch ($endpoint){
-            case 'leaveEvent':
-                $eventController->leaveEvent();
-                break;
             default:
                 http_response_code(404);
                 echo json_encode(['success' => false, 'message' => 'API endpoint not found']);

@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fieldGrid = document.querySelector('.field-grid');
     const searchField = document.getElementById('search-field');
     const sportTypeFilter = document.getElementById('sport-type-filter');
-    const radiusFilter = document.getElementById('radius-filter');
     const applyFiltersBtn = document.getElementById('apply-filters');
     const paginationDiv = document.querySelector('.pagination');
 
@@ -41,14 +40,56 @@ document.addEventListener('DOMContentLoaded', () => {
             const fieldCard = document.createElement('div');
             fieldCard.classList.add('field-card');
 
+            // Get sport type image based on field type
+            const sportImages = {
+                'football': 'images/football.jpg',
+                'basketball': 'images/basketball.jpg',
+                'tennis': 'images/tennis.jpg',
+                'volleyball': 'images/tennis.jpg', // Using tennis image as fallback
+                'multi-sport': 'images/tennis.jpg', // Using tennis image as fallback
+                'yoga': 'images/yoga.jpg'
+            };
+
+            const imageUrl = sportImages[field.type] || 'images/map.png';
+            
+            // Parse amenities if it's JSON
+            let amenitiesText = '';
+            if (field.amenities) {
+                try {
+                    const amenities = JSON.parse(field.amenities);
+                    if (Array.isArray(amenities)) {
+                        amenitiesText = amenities.join(', ');
+                    }
+                } catch (e) {
+                    amenitiesText = field.amenities;
+                }
+            }
+
+            // Parse opening hours if it's JSON
+            let openingHoursText = '';
+            if (field.opening_hours) {
+                try {
+                    const hours = JSON.parse(field.opening_hours);
+                    if (typeof hours === 'object') {
+                        openingHoursText = Object.entries(hours)
+                            .map(([day, time]) => `${day}: ${time}`)
+                            .join(', ');
+                    }
+                } catch (e) {
+                    openingHoursText = field.opening_hours;
+                }
+            }
+
             fieldCard.innerHTML = `
-                <img src="${field.image_url || 'images/map.png'}" alt="${field.name}">
+                <img src="${imageUrl}" alt="${field.name}">
                 <div class="field-card-content">
                     <h3>${field.name}</h3>
-                    <p class="location">Location: ${field.location}</p>
-                    <p class="sport-type">Sport: ${field.sport_type}</p>
-                    <p>${field.description || ''}</p>
-                    <div class="rating">Rating: ${field.average_rating ? field.average_rating.toFixed(1) : 'N/A'} (${field.review_count || 0} reviews)</div>
+                    <p class="location">Address: ${field.address || 'N/A'}</p>
+                    <p class="sport-type">Sport Type: ${field.type}</p>
+                    <p class="coordinates">Coordinates: ${field.latitude}, ${field.longitude}</p>
+                    ${amenitiesText ? `<p class="amenities">Amenities: ${amenitiesText}</p>` : ''}
+                    ${openingHoursText ? `<p class="hours">Hours: ${openingHoursText}</p>` : ''}
+                    <p class="access">Access: ${field.is_public ? 'Public' : 'Private'}</p>
                 </div>
             `;
             fieldGrid.appendChild(fieldCard);
@@ -95,16 +136,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const filters = {};
         const searchQuery = searchField.value.trim();
         const sportType = sportTypeFilter.value;
-        const radius = radiusFilter.value;
 
         if (searchQuery) {
             filters.search = searchQuery;
         }
         if (sportType) {
             filters.sport_type = sportType;
-        }
-        if (radius) {
-            filters.radius = radius;
         }
 
         currentPage = 1; // Reset to first page on new filter

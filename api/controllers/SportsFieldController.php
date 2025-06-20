@@ -5,10 +5,12 @@ require_once __DIR__ . '/../models/SportsFieldModel.php';
 class SportsFieldController
 {
     private $sportsFieldModel;
+    private $db;
 
-    public function __construct()
+    public function __construct($db = null)
     {
-        $this->sportsFieldModel = new SportsFieldModel();
+        $this->db = $db;
+        $this->sportsFieldModel = new SportsFieldModel($db);
     }
 
     public function listFields()
@@ -19,11 +21,10 @@ class SportsFieldController
         $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
         $searchQuery = $_GET['search'] ?? '';
         $sportType = $_GET['sport_type'] ?? '';
-        $radius = isset($_GET['radius']) ? (int)$_GET['radius'] : null;
 
-        if ($searchQuery || $sportType || $radius) {
-            $fields = $this->sportsFieldModel->searchFields($searchQuery, $sportType, $radius, $limit, $offset);
-            $total = $this->sportsFieldModel->countSearchFields($searchQuery, $sportType, $radius);
+        if ($searchQuery || $sportType) {
+            $fields = $this->sportsFieldModel->searchFields($searchQuery, $sportType, $limit, $offset);
+            $total = $this->sportsFieldModel->countSearchFields($searchQuery, $sportType);
         } else {
             $fields = $this->sportsFieldModel->getAllFields($limit, $offset);
             $total = $this->sportsFieldModel->countAllFields();
@@ -35,6 +36,13 @@ class SportsFieldController
             'offset' => $offset,
             'fields' => $fields
         ]);
+    }
+
+    public function listAllFieldsSimple()
+    {
+        header('Content-Type: application/json');
+        $fields = $this->sportsFieldModel->getAllFieldsSimple();
+        echo json_encode(['fields' => $fields]);
     }
 
     public function getField($fieldId)

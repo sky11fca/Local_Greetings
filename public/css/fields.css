@@ -49,6 +49,35 @@
     margin-bottom: 8px;
 }
 
+.field-card-content .coordinates {
+    font-size: 0.85em;
+    color: #999;
+    font-style: italic;
+    margin-bottom: 8px;
+}
+
+.field-card-content .amenities {
+    font-size: 0.9em;
+    color: #2ecc71;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.field-card-content .hours {
+    font-size: 0.9em;
+    color: #3498db;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.field-card-content .access {
+    font-size: 0.9em;
+    color: #e74c3c;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
 .field-card-content .rating {
     color: #f39c12;
     font-size: 1.1em;

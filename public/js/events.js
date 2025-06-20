@@ -3,6 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const eventGrid = document.querySelector('#events-list .event-grid');
     const sportTypeFilter = document.getElementById('sport-type-filter');
+    const searchInput = document.getElementById('search-event');
     const applyFiltersButton = document.getElementById('apply-filters');
     const paginationDiv = document.querySelector('.pagination');
     const tabButtons = document.querySelectorAll('.tab-btn');
@@ -11,25 +12,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentPage = 1;
     let currentTab = 'public';
 
-    async function fetchEvents(page, sportType = null) {
+    async function fetchEvents(page, filters = {}) {
         try {
             const offset = (page - 1) * limit;
-            //let url = `/api/events?limit=${limit}&offset=${offset}`;
-
-            let url = '/local_greeter/api/index.php?action=getEvents';
-
-            // Add tab-specific endpoint
-            if (currentTab === 'joined') {
-                url = '/local_greeter/api/index.php?action=getJoinedEvents';
-            } else if (currentTab === 'created') {
-                url = `/local_greeter/api/index.php?action=getCreatedEvents`;
-            }
+            let url = new URL(window.location.origin + '/local_greeter/api/index.php');
             
-            if (sportType) {
-                url += `&sport_type=${sportType}`;
+            let action = 'getEvents';
+            if (currentTab === 'joined') action = 'getJoinedEvents';
+            else if (currentTab === 'created') action = 'getCreatedEvents';
+            
+            url.searchParams.set('action', action);
+            url.searchParams.set('limit', limit);
+            url.searchParams.set('offset', offset);
+
+            if (currentTab === 'public') {
+                if (filters.sportType) {
+                    url.searchParams.set('sport_type', filters.sportType);
+                }
+                if (filters.search) {
+                    url.searchParams.set('search', filters.search);
+                }
             }
 
-            const token = localStorage.getItem('jwt_token');
+            const token = sessionStorage.getItem('jwt_token');
             const headers = {
                 'Content-Type': 'application/json'
             };
@@ -44,27 +49,60 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             if(currentTab === 'joined' || currentTab === 'created'){
+                if (!token) {
+                    eventGrid.innerHTML = '<p>You must be logged in to view this section. Please <a href="/local_greeter/login">log in</a>.</p>';
+                    paginationDiv.innerHTML = '';
+                    return;
+                }
+
                 const userData = JSON.parse(sessionStorage.getItem('user'));
+                if (!userData || !userData.id) {
+                    eventGrid.innerHTML = '<p>Your session seems to be invalid. Please <a href="/local_greeter/login">log in</a> again.</p>';
+                    paginationDiv.innerHTML = '';
+                    return;
+                }
+
                 options.body = JSON.stringify({
                     user_id: userData.id,
                 });
             }
-
 
             const response = await fetch(url, options);
             const data = await response.json();
 
             if (response.ok) {
                 renderEvents(data.events);
-                renderPagination(data.total_events || 20);
+                renderPagination(data.total_events || 0);
             } else {
-                console.error('Failed to fetch events:', data.error);
+                console.error('Failed to fetch events:', data.error || data);
                 eventGrid.innerHTML = '<p>Failed to load events. Please try again later.</p>';
             }
         } catch (error) {
             console.error('Error fetching events:', error);
             eventGrid.innerHTML = '<p>An error occurred. Please try again later.</p>';
         }
+    }
+
+    function formatDate(dateString) {
+        // The date from MySQL is in 'YYYY-MM-DD HH:MM:SS' format.
+        // To ensure cross-browser compatibility, we replace the space with a 'T'.
+        const safeDateString = dateString.replace(' ', 'T');
+        const date = new Date(safeDateString);
+        
+        if (isNaN(date.getTime())) {
+            // Return a fallback string if the date is invalid
+            return 'Invalid Date';
+        }
+
+        const options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        };
+        return date.toLocaleString('en-US', options);
     }
 
     function renderEvents(events) {
@@ -83,11 +121,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="event-card-content">
                     <h3>${event.title}</h3>
                     <p class="location">${event.address}</p>
-                    <p class="date">${new Date(event.start_time).toLocaleDateString()} - ${new Date(event.end_time).toLocaleDateString()}</p>
+                    <p class="date">${formatDate(event.start_time)}</p>
                     <p class="participants">${event.current_participants}/${event.max_participants} participants</p>
                     ${event.cost > 0 ? `<p class="cost">Cost: $${event.cost.toFixed(2)}</p><p class="cost-per-participant">Cost per participant: $${(event.cost / Math.max(1, event.current_participants)).toFixed(2)}</p>` : '<p class="cost">Cost: Free</p>'}
                     <p>${event.description.substring(0, 100)}...</p>
-                    ${currentTab === 'public' ? `<button class="btn btn-primary join-event-btn" data-event-id="${event.event_id}">Join Event</button>` : ''}
+                    <div class="event-card-actions">
+                        ${currentTab === 'public' ? `<button class="btn btn-primary join-event-btn" data-event-id="${event.event_id}">Join Event</button>` : ''}
+                        ${currentTab === 'created' ? `<a href="/local_greeter/edit-event?event_id=${event.event_id}" class="btn btn-secondary">Edit Event</a>` : ''}
+                        ${currentTab === 'joined' ? `<button class="btn btn-danger leave-event-btn" data-event-id="${event.event_id}">Leave Event</button>` : ''}
+                    </div>
                 </div>
             `;
             eventGrid.appendChild(eventCard);
@@ -100,6 +142,49 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await joinEvent(eventId, e.target);
             });
         });
+
+        document.querySelectorAll('.leave-event-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const eventId = e.target.dataset.eventId;
+                await leaveEvent(eventId);
+            });
+        });
+    }
+
+    async function leaveEvent(eventId) {
+        if (!confirm('Are you sure you want to leave this event?')) {
+            return;
+        }
+
+        const token = sessionStorage.getItem('jwt_token');
+        if (!token) {
+            alert('Your session seems to have expired. Please log in again.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/local_greeter/api/index.php?action=leaveEvent', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ event_id: eventId })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                alert('You have successfully left the event.');
+                // Re-fetch events to update the list
+                applyFilters();
+            } else {
+                throw new Error(data.message || 'Failed to leave event.');
+            }
+        } catch (error) {
+            console.error('Error leaving event:', error);
+            alert(`Could not leave event: ${error.message}`);
+        }
     }
 
     async function joinEvent(eventId, buttonElement) {
@@ -121,8 +206,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 ,
                 body: JSON.stringify({
-                    event_id: eventId,
-                    sessions_token: token //PLACEHOLDER solution
+                    event_id: eventId
                 })
             });
 
@@ -136,9 +220,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 buttonElement.classList.remove('btn-primary');
                 buttonElement.classList.add('btn-secondary');
                 // Re-fetch events to update participant count and cost per participant
-                fetchEvents(currentPage, sportTypeFilter.value);
+                fetchEvents(currentPage, { sportType: sportTypeFilter.value });
             } else {
-                alert(data.error || 'Failed to join event');
+                alert(data.message || 'Failed to join event');
             }
         } catch (error) {
             console.error('Error joining event:', error);
@@ -159,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             button.addEventListener('click', () => {
                 currentPage = i;
-                fetchEvents(currentPage, sportTypeFilter.value);
+                fetchEvents(currentPage, { sportType: sportTypeFilter.value });
             });
             paginationDiv.appendChild(button);
         }
@@ -177,15 +261,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentPage = 1;
             
             // Fetch events for the selected tab
-            fetchEvents(currentPage, sportTypeFilter.value);
+            applyFilters();
         });
     });
 
-    applyFiltersButton.addEventListener('click', () => {
+    function applyFilters() {
         currentPage = 1;
-        fetchEvents(currentPage, sportTypeFilter.value);
-    });
+        const filters = {
+            sportType: sportTypeFilter.value,
+            search: searchInput.value
+        };
+        fetchEvents(currentPage, filters);
+    }
+
+    applyFiltersButton.addEventListener('click', applyFilters);
 
     // Initial fetch
-    fetchEvents(currentPage);
+    applyFilters();
 }); 

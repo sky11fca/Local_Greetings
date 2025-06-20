@@ -29,6 +29,7 @@ include __DIR__ . '/../templates/header.php';
                         <!-- You can add more details here, e.g., joined events, created events -->
                     </div>
                     <a href="/local_greeter/profile" class="btn btn-primary btn-block mt-3">Edit Profile</a>
+                    <a href="/local_greeter/event-history" class="btn btn-info btn-block mt-3">View My Event History</a>
                     <button id="logoutButton" class="btn btn-secondary btn-block mt-3">Log Out</button>
                 </div>
 

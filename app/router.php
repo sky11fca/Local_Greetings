@@ -13,7 +13,9 @@ class Router {
             'register' => 'register',
             'account' => 'account',
             'profile' => 'profile',
-            'create-event' => 'create-event'
+            'create-event' => 'create-event',
+            'edit-event' => 'edit-event',
+            'event-history' => 'event-history'
         ];
     }
     

@@ -1,16 +1,16 @@
 <?php
 // Set page-specific variables
-$pageTitle = "Create Event - Iași Sports Network";
-$currentPage = "create-event";
+$pageTitle = "Edit Event - Iași Sports Network";
+$currentPage = "edit-event";
 
 // Additional CSS files for this page
 $additionalCSS = [
-    "/local_greeter/public/css/create-event.css"
+    "/local_greeter/public/css/create-event.css" // Can reuse the same CSS
 ];
 
 // Additional scripts for this page
 $additionalScripts = [
-    "/local_greeter/public/js/create-event.js"
+    "/local_greeter/public/js/edit-event.js"
 ];
 
 // Include the header template
@@ -18,22 +18,23 @@ include __DIR__ . '/../templates/header.php';
 ?>
 
 <main>
-    <section id="create-event-section">
+    <section id="edit-event-section">
         <div class="container">
-            <h2>Create New Event</h2>
-            <form id="createEventForm">
+            <h2>Edit Event</h2>
+            <form id="editEventForm">
+                <input type="hidden" id="event_id" name="event_id">
+                
                 <div class="form-group">
                     <label for="title">Event Title</label>
-                    <input type="text" id="title" name="title" placeholder="e.g., Football Match" required>
+                    <input type="text" id="title" name="title" required>
                 </div>
                 <div class="form-group">
                     <label for="description">Description</label>
-                    <textarea id="description" name="description" placeholder="Describe your event..." rows="5"></textarea>
+                    <textarea id="description" name="description" rows="5"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="sports_field_id">Sports Field</label>
                     <select id="sports_field_id" name="sports_field_id" required>
-                        <option value="">Select a Sports Field</option>
                         <!-- Options will be loaded dynamically -->
                     </select>
                 </div>
@@ -54,11 +55,11 @@ include __DIR__ . '/../templates/header.php';
                     <input type="number" id="min_participations" name="min_participations" min="0" placeholder="e.g., 5">
                     <small>Set a minimum number of past events a user must have joined in this sport to register.</small>
                 </div>
-                <div class="form-group">
-                    <label for="cost">Cost (optional)</label>
-                    <input type="number" id="cost" name="cost" min="0" step="0.01" value="0">
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Event</button>
+                    <button type="button" id="delete-event-btn" class="btn btn-danger">Delete Event</button>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Create Event</button>
             </form>
         </div>
     </section>

@@ -92,6 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 start_time: createEventForm.start_time.value,
                 end_time: createEventForm.end_time.value,
                 max_participants: createEventForm.max_participants.value,
+                min_participations: createEventForm.min_participations.value || null,
                 field_id: selectedFieldId,
                 field_type: fieldDetails.type,
             }

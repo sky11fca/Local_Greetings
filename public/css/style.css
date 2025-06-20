@@ -172,15 +172,24 @@ body.dark-mode .theme-toggle-btn:hover {
     box-sizing: border-box;
 }
 
-body {
-    font-family: 'Roboto', sans-serif;
+html, body {
+    height: 100%;
     margin: 0;
     padding: 0;
-    background-color: var(--light-background-color); /* Use the specific light grey */
-    color: var(--text-color);
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    background-color: var(--light-background-color); /* Use the specific light grey */
+    color: var(--text-color);
+}
+
+main {
+    flex: 1;
+    padding-top: 60px; /* Adjust based on header height */
 }
 
 .container {
@@ -249,11 +258,6 @@ header {
     left: 0;
     z-index: 99999; /* Extremely high z-index to ensure header is always on top */
     box-shadow: none; /* No shadow as per image */
-}
-
-main {
-    flex: 1;
-    padding-top: 60px; /* Adjust based on header height */
 }
 
 header .container {
