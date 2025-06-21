@@ -23,12 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateProfileDisplay() {
         console.log('updateProfileDisplay called.');
-        const isLoggedIn = localStorage.getItem('isLoggedIn');
-        console.log('isLoggedIn status:', isLoggedIn);
+        // Check for JWT token in sessionStorage instead of localStorage
+        const token = sessionStorage.getItem('jwt_token');
+        const isLoggedIn = token !== null && token !== '';
+        console.log('JWT token exists:', isLoggedIn);
 
         if (profileButton && profilePictureLink) {
             console.log('Profile button and picture link elements found.');
-            if (isLoggedIn === 'true') {
+            if (isLoggedIn) {
                 console.log('User is logged in. Hiding profile button, showing profile picture.');
                 profileButton.classList.add('hidden');
                 profilePictureLink.classList.remove('hidden');
@@ -47,6 +49,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial update on page load
     updateProfileDisplay();
 
-    // Listen for storage changes (e.g., login/logout from auth.js)
-    window.addEventListener('storage', updateProfileDisplay);
+    // Listen for storage changes from other tabs/windows only
+    // This prevents the event from firing when the same page updates storage
+    let lastToken = sessionStorage.getItem('jwt_token');
+    window.addEventListener('storage', (e) => {
+        // Only update if the JWT token changed and it's from a different tab/window
+        if (e.key === 'jwt_token' && e.newValue !== lastToken) {
+            lastToken = e.newValue;
+            updateProfileDisplay();
+        }
+    });
 }); 

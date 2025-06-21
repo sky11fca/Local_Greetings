@@ -91,44 +91,70 @@
     font-size: 1.05rem;
 }
 
+/* Danger Button for Leave Event */
+.btn-danger {
+    background-color: #dc3545 !important;
+    color: white !important;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+
+.btn-danger:hover {
+    background-color: #c82333 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
 /* Event Grid - Reusing styles from home.css for consistency */
 #events-list .event-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 35px;
-    justify-content: center;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    align-items: stretch;
     margin-top: 40px;
 }
 
 #events-list .event-card {
-    background-color: var(--white-color);
-    border-radius: 15px;
+    background-color: var(--card-background-color);
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
-    text-align: left;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 #events-list .event-card:hover {
-    transform: translateY(-15px);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
-#events-list .event-card img {
+#events-list .event-card .card-img-top {
     width: 100%;
     height: 200px;
     object-fit: cover;
-    border-radius: 15px 15px 0 0;
 }
 
-#events-list .event-card-content {
+#events-list .event-card .card-body {
     padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-#events-list .event-card h3 {
+#events-list .event-card .card-title {
     font-size: 1.5rem;
-    margin: 10px 0 8px;
+    font-weight: 600;
     color: var(--primary-color);
+    margin-bottom: 15px;
 }
 
 #events-list .event-card p {
@@ -197,4 +223,17 @@
     background-color: var(--dark-color);
     cursor: default;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Media Query for Mobile Devices */
+@media (max-width: 768px) {
+    #events-list .filters {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    #events-list .event-grid {
+        grid-template-columns: 1fr; /* Switch to a single column on smaller screens */
+        gap: 20px;
+    }
 } 

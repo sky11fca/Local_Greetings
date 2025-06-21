@@ -54,6 +54,7 @@ class EventModel
         e.event_id,
         e.title,
         e.description,
+        e.organizer_id,
         u.username as organizer_name,
         sf.name as field_name,
         sf.address,
@@ -83,10 +84,6 @@ class EventModel
 
         $query .= " ORDER BY e.start_time ASC";
 
-
-
-
-
         $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -97,6 +94,7 @@ class EventModel
         e.event_id,
         e.title,
         e.description,
+        e.organizer_id,
         u.username as organizer_name,
         sf.name as field_name,
         sf.address,
@@ -149,7 +147,7 @@ class EventModel
             try{
                 $this->db->beginTransaction();
 
-                // Add participant
+                // Add participant with confirmed status
                 $stmt = $this->db->prepare("INSERT INTO EventParticipants (event_id, user_id, status) VALUES (?, ?, 'confirmed')");
                 $stmt->execute([$eventId, $userId]);
 
@@ -164,8 +162,7 @@ class EventModel
                 $this->db->rollBack();
                 return ["success" => false, "message" => "Error joining event: " . $e->getMessage()];
             }
-
-    }
+        }
     public function leaveEvent($eventId, $userId)
     {
         try {
@@ -212,24 +209,13 @@ class EventModel
                 ':title' => $data['title'],
                 ':description' => $data['description'],
                 ':field_id' => $data['field_id'],
-                ':sport_type' => $data['field_type'],
+                ':sport_type' => $data['sport_type'],
                 ':end_time' => $data['end_time'],
                 ':start_time' => $data['start_time'],
                 ':max_participants' => $data['max_participants']
             ]);
 
             $eventId = $this->db->lastInsertId();
-
-            // Set the registration policy
-            if (!empty($data['min_participations'])) {
-                $policyStmt = $this->db->prepare(
-                    "INSERT INTO RegistrationPolicies (event_id, min_participations) VALUES (:event_id, :min_participations)"
-                );
-                $policyStmt->execute([
-                    ':event_id' => $eventId,
-                    ':min_participations' => $data['min_participations']
-                ]);
-            }
 
             //Add the event organizer as participant
             $stmt = $this->db->prepare("INSERT INTO EventParticipants (event_id, user_id, status) VALUES (?, ?, 'confirmed')");
@@ -261,10 +247,10 @@ class EventModel
         }
     }
 
-    public function getPublicEvents($limit, $offset, $sportType = null, $search = null)
+    public function getPublicEvents($limit, $offset, $sportType = null, $search = null, $excludeUserId = null)
     {
         $query = "SELECT 
-            e.event_id, e.title, e.description, e.start_time, e.end_time,
+            e.event_id, e.title, e.description, e.organizer_id, e.start_time, e.end_time,
             e.max_participants, e.current_participants,
             u.username as organizer_name,
             sf.name as field_name, sf.address,
@@ -275,6 +261,12 @@ class EventModel
         WHERE e.end_time > NOW()";
 
         $params = [];
+
+        // Exclude events created by the current user
+        if ($excludeUserId) {
+            $query .= " AND e.organizer_id != :exclude_user_id";
+            $params[':exclude_user_id'] = $excludeUserId;
+        }
 
         if ($sportType) {
             $query .= " AND e.sport_type = :sport_type";
@@ -293,6 +285,9 @@ class EventModel
         $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
 
+        if ($excludeUserId) {
+            $stmt->bindValue(':exclude_user_id', $excludeUserId, PDO::PARAM_INT);
+        }
         if ($sportType) {
             $stmt->bindValue(':sport_type', $sportType, PDO::PARAM_STR);
         }
@@ -304,10 +299,39 @@ class EventModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function countPublicEvents($sportType = null, $search = null)
+    public function getUserParticipationStatus($eventIds, $userId)
+    {
+        if (empty($eventIds)) {
+            return [];
+        }
+        
+        $placeholders = str_repeat('?,', count($eventIds) - 1) . '?';
+        $query = "SELECT event_id FROM EventParticipants WHERE event_id IN ($placeholders) AND user_id = ? AND status = 'confirmed'";
+        
+        $params = array_merge($eventIds, [$userId]);
+        $stmt = $this->db->prepare($query);
+        $stmt->execute($params);
+        
+        $participatedEvents = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $result = [];
+        
+        foreach ($eventIds as $eventId) {
+            $result[$eventId] = in_array($eventId, $participatedEvents);
+        }
+        
+        return $result;
+    }
+
+    public function countPublicEvents($sportType = null, $search = null, $excludeUserId = null)
     {
         $query = "SELECT COUNT(*) FROM Events e WHERE e.end_time > NOW()";
         $params = [];
+
+        // Exclude events created by the current user
+        if ($excludeUserId) {
+            $query .= " AND e.organizer_id != :exclude_user_id";
+            $params[':exclude_user_id'] = $excludeUserId;
+        }
 
         if ($sportType) {
             $query .= " AND e.sport_type = :sport_type";
@@ -320,7 +344,18 @@ class EventModel
         }
 
         $stmt = $this->db->prepare($query);
-        $stmt->execute($params);
+        
+        if ($excludeUserId) {
+            $stmt->bindValue(':exclude_user_id', $excludeUserId, PDO::PARAM_INT);
+        }
+        if ($sportType) {
+            $stmt->bindValue(':sport_type', $sportType, PDO::PARAM_STR);
+        }
+        if ($search) {
+            $stmt->bindValue(':search', '%' . $search . '%', PDO::PARAM_STR);
+        }
+        
+        $stmt->execute();
         return $stmt->fetchColumn();
     }
 
@@ -360,37 +395,6 @@ class EventModel
                 ':event_id' => $eventId,
                 ':organizer_id' => $userId
             ]);
-
-            // Handle the registration policy
-            $policyStmt = $this->db->prepare("SELECT policy_id FROM RegistrationPolicies WHERE event_id = :event_id");
-            $policyStmt->execute([':event_id' => $eventId]);
-            $existingPolicy = $policyStmt->fetch();
-
-            if (!empty($data['min_participations'])) {
-                if ($existingPolicy) {
-                    // Update existing policy
-                    $updatePolicyStmt = $this->db->prepare(
-                        "UPDATE RegistrationPolicies SET min_participations = :min_participations WHERE event_id = :event_id"
-                    );
-                    $updatePolicyStmt->execute([
-                        ':min_participations' => $data['min_participations'],
-                        ':event_id' => $eventId
-                    ]);
-                } else {
-                    // Insert new policy
-                    $insertPolicyStmt = $this->db->prepare(
-                        "INSERT INTO RegistrationPolicies (event_id, min_participations) VALUES (:event_id, :min_participations)"
-                    );
-                    $insertPolicyStmt->execute([
-                        ':event_id' => $eventId,
-                        ':min_participations' => $data['min_participations']
-                    ]);
-                }
-            } elseif ($existingPolicy) {
-                // Delete policy if it's no longer needed
-                $deletePolicyStmt = $this->db->prepare("DELETE FROM RegistrationPolicies WHERE event_id = :event_id");
-                $deletePolicyStmt->execute([':event_id' => $eventId]);
-            }
 
             $this->db->commit();
             return ['success' => true, 'message' => 'Event updated successfully.'];

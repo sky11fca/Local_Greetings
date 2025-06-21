@@ -28,13 +28,23 @@ include __DIR__ . '/../templates/header.php';
                 </div>
                 <div class="form-group">
                     <label for="description">Description</label>
-                    <textarea id="description" name="description" placeholder="Describe your event..." rows="5"></textarea>
+                    <textarea id="description" name="description" placeholder="Describe your event..." rows="5" required></textarea>
                 </div>
                 <div class="form-group">
                     <label for="sports_field_id">Sports Field</label>
                     <select id="sports_field_id" name="sports_field_id" required>
-                        <option value="">Select a Sports Field</option>
-                        <!-- Options will be loaded dynamically -->
+                        <option value="">Loading fields...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="sport_type">Sport Type</label>
+                    <select id="sport_type" name="sport_type" required>
+                        <option value="">Select a Sport Type</option>
+                        <option value="football">Football</option>
+                        <option value="basketball">Basketball</option>
+                        <option value="tennis">Tennis</option>
+                        <option value="volleyball">Volleyball</option>
+                        <option value="other">Other</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -46,18 +56,10 @@ include __DIR__ . '/../templates/header.php';
                     <input type="datetime-local" id="end_time" name="end_time" required>
                 </div>
                 <div class="form-group">
-                    <label for="max_participants">Maximum Participants</label>
+                    <label for="max_participants">Max Participants</label>
                     <input type="number" id="max_participants" name="max_participants" min="1" required>
                 </div>
-                <div class="form-group">
-                    <label for="min_participations">Minimum Participations Required (optional)</label>
-                    <input type="number" id="min_participations" name="min_participations" min="0" placeholder="e.g., 5">
-                    <small>Set a minimum number of past events a user must have joined in this sport to register.</small>
-                </div>
-                <div class="form-group">
-                    <label for="cost">Cost (optional)</label>
-                    <input type="number" id="cost" name="cost" min="0" step="0.01" value="0">
-                </div>
+                
                 <button type="submit" class="btn btn-primary btn-block">Create Event</button>
             </form>
         </div>

@@ -84,51 +84,77 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function formatDate(dateString) {
-        // The date from MySQL is in 'YYYY-MM-DD HH:MM:SS' format.
-        // To ensure cross-browser compatibility, we replace the space with a 'T'.
-        const safeDateString = dateString.replace(' ', 'T');
-        const date = new Date(safeDateString);
-        
-        if (isNaN(date.getTime())) {
-            // Return a fallback string if the date is invalid
-            return 'Invalid Date';
+        if (!dateString || dateString.includes('Invalid')) {
+            return 'TBD';
         }
+        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    }
 
-        const options = {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
+    function getDefaultImage(sportType) {
+        const defaultImages = {
+            'football': '/local_greeter/public/images/football.jpg',
+            'basketball': '/local_greeter/public/images/basketball.jpeg',
+            'tennis': '/local_greeter/public/images/tennis.jpg',
+            
+            // Add other sport types and their default images here
+            'default': '/local_greeter/public/images/other.jpeg'
         };
-        return date.toLocaleString('en-US', options);
+        return defaultImages[sportType.toLowerCase()] || defaultImages['default'];
     }
 
     function renderEvents(events) {
         eventGrid.innerHTML = '';
         if (events.length === 0) {
-            eventGrid.innerHTML = '<p>No events found.</p>';
+            eventGrid.innerHTML = '<p>No events found for this category.</p>';
             return;
         }
+
+        const userData = JSON.parse(sessionStorage.getItem('user'));
+        const userId = userData ? userData.id : null;
 
         events.forEach(event => {
             const eventCard = document.createElement('div');
             eventCard.classList.add('event-card');
-            
+
+            let buttonsHTML = '';
+            const isUserCreator = userId && event.organizer_id == userId;
+
+            // Determine which button to show based on current tab and user relationship
+            if (currentTab === 'created') {
+                // In "My Created Events" tab - always show edit button
+                buttonsHTML = `<a href="/local_greeter/edit-event?event_id=${event.event_id}" class="btn btn-secondary">Edit Event</a>`;
+            } else if (currentTab === 'joined') {
+                // In "My Joined Events" tab - always show leave button
+                buttonsHTML = `<button class="btn btn-danger leave-event-btn" data-event-id="${event.event_id}">Leave Event</button>`;
+            } else {
+                // In "Public Events" tab - show appropriate button based on relationship
+                if (isUserCreator) {
+                    buttonsHTML = `<a href="/local_greeter/edit-event?event_id=${event.event_id}" class="btn btn-secondary">Edit Event</a>`;
+                } else {
+                    // Check if user is already a participant using the is_participant field
+                    const isUserJoined = event.is_participant === true;
+                    if (isUserJoined) {
+                        buttonsHTML = `<button class="btn btn-danger leave-event-btn" data-event-id="${event.event_id}">Leave Event</button>`;
+                    } else {
+                        buttonsHTML = `<button class="btn btn-primary join-event-btn" data-event-id="${event.event_id}">Join Event</button>`;
+                    }
+                }
+            }
+
+            const imageUrl = event.image_path ? `/local_greeter/public/images/events/${event.image_path}` : getDefaultImage(event.sport_type);
+
             eventCard.innerHTML = `
-                <img src="/local_greeter/public/images/default-profile.png" alt="Event image for ${event.title}">
-                <div class="event-card-content">
-                    <h3>${event.title}</h3>
-                    <p class="location">${event.address}</p>
-                    <p class="date">${formatDate(event.start_time)}</p>
-                    <p class="participants">${event.current_participants}/${event.max_participants} participants</p>
-                    ${event.cost > 0 ? `<p class="cost">Cost: $${event.cost.toFixed(2)}</p><p class="cost-per-participant">Cost per participant: $${(event.cost / Math.max(1, event.current_participants)).toFixed(2)}</p>` : '<p class="cost">Cost: Free</p>'}
-                    <p>${event.description.substring(0, 100)}...</p>
-                    <div class="event-card-actions">
-                        ${currentTab === 'public' ? `<button class="btn btn-primary join-event-btn" data-event-id="${event.event_id}">Join Event</button>` : ''}
-                        ${currentTab === 'created' ? `<a href="/local_greeter/edit-event?event_id=${event.event_id}" class="btn btn-secondary">Edit Event</a>` : ''}
-                        ${currentTab === 'joined' ? `<button class="btn btn-danger leave-event-btn" data-event-id="${event.event_id}">Leave Event</button>` : ''}
+                <img src="${imageUrl}" alt="${event.title}" class="card-img-top">
+                <div class="card-body">
+                    <h3 class="card-title">${event.title}</h3>
+                    <p class="card-text location"><i class="icon-map-pin"></i> ${event.address}</p>
+                    <p class="card-text date"><i class="icon-calendar"></i> ${formatDate(event.start_time)}</p>
+                    <p class="card-text participants"><i class="icon-users"></i> ${event.current_participants}/${event.max_participants} participants</p>
+                    <p class="card-text cost"><i class="icon-dollar-sign"></i> ${event.cost > 0 ? '$' + event.cost : 'Free'}</p>
+                    <p class="card-text description">${event.description}</p>
+                    <div class="event-actions mt-auto">
+                        ${buttonsHTML}
                     </div>
                 </div>
             `;

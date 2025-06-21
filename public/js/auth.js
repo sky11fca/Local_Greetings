@@ -47,7 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const storeAuthData = (token, userData) =>{
         const rememberMe = document.getElementById('remember-me');
-        //sessionStorage.setItem('jwt_token', token);
+        // Store JWT token in sessionStorage for authentication
+        sessionStorage.setItem('jwt_token', token);
+        sessionStorage.setItem('user', JSON.stringify(userData));
         setCookie('userData', token);
         if(rememberMe.checked){
             setCookie('userDataPersist', JSON.stringify(userData), 30);

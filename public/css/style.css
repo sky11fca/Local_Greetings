@@ -180,16 +180,16 @@ html, body {
 
 body {
     font-family: 'Roboto', sans-serif;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: var(--light-background-color); /* Use the specific light grey */
+    min-height: 100vh;
+    background-color: var(--light-background-color);
     color: var(--text-color);
 }
 
 main {
-    flex: 1;
-    padding-top: 60px; /* Adjust based on header height */
+    flex-grow: 1; /* Allows main content to take up available space */
+    padding-top: 80px; /* Add padding to push content below fixed header */
 }
 
 .container {
@@ -214,6 +214,14 @@ main {
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); /* Subtle shadow, matching image */
     position: relative;
     overflow: hidden;
+}
+
+.force-visible-label {
+    display: block !important;
+    text-align: left !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+    margin-bottom: 8px !important;
 }
 
 .btn:hover {

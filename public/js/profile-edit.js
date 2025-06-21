@@ -1,43 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
     const profileEditForm = document.getElementById('profileEditForm');
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    }
-
-    function setCookie(name, value, days=7) {
-        const date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
-        const expires = `expires=${date.toUTCString()}`;
-        document.cookie = `${name}=${value};${expires};path=/`;
-    }
-
-    function getUserData()
-    {
-        const userData = getCookie('userData');
-        if(!userData) return null;
-
-        try{
-            const base64Payload = userData.split('.')[1];
-            const payload = atob(base64Payload);
-            console.log(payload);
-            return JSON.parse(payload);
-        }catch(e)
-        {
-            console.error(e);
-            return null;
-        }
-    }
 
     function populateForm() {
-        const userData = getUserData();
-        if (!userData) {
+        const token = sessionStorage.getItem('jwt_token');
+        if (!token) {
             window.location.href = '/local_greeter/login';
+            return;
         }
-        const {username, email} = userData;
-        profileEditForm.username.value = userData.username || '';
-        profileEditForm.email.value = userData.email || '';
+
+        // Get user data from sessionStorage
+        const userData = JSON.parse(sessionStorage.getItem('user') || '{}');
+        if (!userData || !userData.username) {
+            window.location.href = '/local_greeter/login';
+            return;
+        }
+
+        // Populate form with actual user data
+        document.getElementById('username').value = userData.username || '';
+        document.getElementById('email').value = userData.email || '';
     }
 
     populateForm();
@@ -45,6 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (profileEditForm) {
         profileEditForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const token = sessionStorage.getItem('jwt_token');
+            if (!token) {
+                alert('Your session has expired. Please log in again.');
+                window.location.href = '/local_greeter/login';
+                return;
+            }
+
             const formData = {
                 username: profileEditForm.username.value.trim(),
                 email: profileEditForm.email.value.trim(),
@@ -53,18 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 confirmNewPassword: profileEditForm.confirm_new_password.value.trim()
             };
 
-            if (formData.newPassword !== formData.confirmNewPassword && formData.newPassword) {
-                alert('Passwords do not match');
+            // Validate password confirmation
+            if (formData.newPassword && formData.newPassword !== formData.confirmNewPassword) {
+                alert('New passwords do not match');
                 return;
             }
 
-            const userData = getUserData();
-
-            console.log(userData);
-
-            if(!userData || !userData.user_id)
-            {
-                alert('Failed to update profile');
+            // Validate that at least one field is being updated
+            if (!formData.username && !formData.email && !formData.newPassword) {
+                alert('Please provide at least one field to update');
                 return;
             }
 
@@ -72,44 +57,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch("/local_greeter/api/index.php?action=updateProfile", {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        'user_id': userData.user_id,
-                        'username': formData.username || userData.username,
-                        'email': formData.email || userData.email,
-                        'password': formData.newPassword || undefined
+                        username: formData.username || undefined,
+                        email: formData.email || undefined,
+                        password: formData.newPassword || undefined
                     })
                 });
 
                 const result = await response.json();
 
                 if (!response.ok || !result.success) {
-                    throw new Error('Failed to update profile');
+                    throw new Error(result.message || 'Failed to update profile');
                 }
 
-                if(result.token){
-                    setCookie('userData', result.token);
+                // Update sessionStorage with new token and user data
+                if (result.token) {
+                    sessionStorage.setItem('jwt_token', result.token);
+                }
+                
+                if (result.data) {
+                    sessionStorage.setItem('user', JSON.stringify(result.data));
                 }
 
-                if(getCookie('userDataPersist')){
-                    const userData = {
-                        id: result.data.user_id,
-                        username: result.data.username,
-                        email: result.data.email
-                    }
-
-                    setCookie('userDataPersist', JSON.stringify(userData), 30);
-                }
-
+                alert('Profile updated successfully!');
                 window.location.href = '/local_greeter/account';
 
-
             } catch (error) {
-                alert(error.message);
-                return;
+                console.error('Error updating profile:', error);
+                alert(error.message || 'An error occurred while updating your profile');
             }
-
         });
     }
 });

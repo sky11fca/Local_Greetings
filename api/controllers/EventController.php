@@ -61,8 +61,30 @@ class EventController
         }
 
         try {
-            $events = $this->eventModel->getPublicEvents($limit, $offset, $sportType, $search);
-            $totalEvents = $this->eventModel->countPublicEvents($sportType, $search);
+            // Get current user ID if logged in
+            $currentUserId = null;
+            $token = $this->getBearerToken();
+            if ($token) {
+                $payload = JWT::validate($token);
+                if ($payload) {
+                    $currentUserId = $payload['user_id'];
+                }
+            }
+
+            $events = $this->eventModel->getPublicEvents($limit, $offset, $sportType, $search, $currentUserId);
+            $totalEvents = $this->eventModel->countPublicEvents($sportType, $search, $currentUserId);
+
+            // Get user participation status if user is logged in
+            $participationStatus = [];
+            if ($currentUserId && !empty($events)) {
+                $eventIds = array_column($events, 'event_id');
+                $participationStatus = $this->eventModel->getUserParticipationStatus($eventIds, $currentUserId);
+            }
+
+            // Add participation status to each event
+            foreach ($events as &$event) {
+                $event['is_participant'] = $participationStatus[$event['event_id']] ?? false;
+            }
 
             echo json_encode([
                 'total_events' => $totalEvents,
@@ -251,11 +273,16 @@ class EventController
             $organizerId = $payload['user_id'];
 
             // Validate required fields
-            $requiredFields = ['title', 'description', 'field_id', 'field_type', 'end_time', 'start_time', 'max_participants'];
+            $requiredFields = ['title', 'field_id', 'sport_type', 'end_time', 'start_time', 'max_participants'];
             foreach ($requiredFields as $field) {
-                if (empty($data[$field])) {
+                if (!isset($data[$field]) || $data[$field] === '') {
                     throw new Exception('Missing required field: ' . $field, 400);
                 }
+            }
+
+            // Validate description (can be empty but must be present)
+            if (!isset($data['description'])) {
+                throw new Exception('Missing required field: description', 400);
             }
 
             // Pass the whole data array to the model
@@ -411,4 +438,8 @@ class EventController
         }
     }
 
+    public function sendRssFeed()
+    {
+        // Implementation of sendRssFeed method
+    }
 } 

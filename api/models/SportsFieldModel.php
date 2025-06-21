@@ -4,22 +4,14 @@ class SportsFieldModel
 {
     private $db;
 
-    public function __construct($db = null)
+    public function __construct($db)
     {
-        if ($db) {
-            $this->db = $db;
-        } else {
-            try {
-                $this->db = new PDO(
-                    'mysql:host=127.0.0.1;dbname=local_greeter',
-                    'bobby',
-                    'bobbydb3002',
-                    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-                );
-            } catch (PDOException $e) {
-                die("Database connection failed: " . $e->getMessage());
-            }
+        if (!$db) {
+            // If no database connection is provided, it's a critical error.
+            // The controller is responsible for providing this.
+            throw new \Exception("Database connection is not provided to SportsFieldModel.");
         }
+        $this->db = $db;
     }
 
     public function getAllFields($limit, $offset)

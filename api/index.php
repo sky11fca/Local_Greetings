@@ -80,7 +80,7 @@ try{
                 $eventController->listPastEvents();
                 break;
             case 'listFields':
-                $sportsFieldController->searchFields();
+                $sportsFieldController->listFields();
                 break;
             case 'getSportsFields':
                 $sportsFieldController->listAllFieldsSimple();

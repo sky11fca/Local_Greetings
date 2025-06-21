@@ -13,11 +13,19 @@ $additionalScripts = [
     "/local_greeter/public/js/profile-edit.js"
 ];
 
+// Add inline styles to override any conflicting CSS
+$inlineCSS = "
+    .form-group label {
+        display: block !important;
+        visibility: visible !important;
+    }
+";
+
 // Include the header template
 include __DIR__ . '/../templates/header.php';
 ?>
 
-<main>
+<main class="profile-page">
     <section id="profile-edit-section">
         <div class="container mt-5">
             <div class="auth-container">
@@ -25,12 +33,12 @@ include __DIR__ . '/../templates/header.php';
                     <h2>Edit Your Profile</h2>
                     <form id="profileEditForm">
                         <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" id="username" name="username" placeholder="Your Username" value="CurrentUser" required>
+                            <label for="username" class="force-visible-label">Username</label>
+                            <input type="text" id="username" name="username" placeholder="Your Username" required>
                         </div>
                         <div class="form-group">
                             <label for="email">Email address</label>
-                            <input type="email" id="email" name="email" placeholder="Your Email" value="user@example.com" required>
+                            <input type="email" id="email" name="email" placeholder="Your Email" required>
                         </div>
                         <div class="form-group">
                             <label for="old_password">Current Password (optional)</label>

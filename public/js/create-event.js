@@ -4,31 +4,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const createEventForm = document.getElementById('createEventForm');
     const sportsFieldSelect = document.getElementById('sports_field_id');
 
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    }
-
-    function getUserData(){
-        const token = getCookie('userData');
-        if(!token){
-            return null;
-        }
-        try{
-            const userData = JSON.parse(atob(token.split('.')[1]));
-            return userData.user_id;
-        }catch(e){
-            console.error(e);
-            return null;
-        }
-
-    }
-
     // Function to fetch sports fields and populate the dropdown
     async function fetchSportsFields() {
         try {
-            const response = await fetch('/local_greeter/api/index.php?action=listFields');
+            const response = await fetch('/local_greeter/api/index.php?action=getSportsFields');
             const data = await response.json();
 
             if (response.ok) {
@@ -49,32 +28,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function getFieldType(fieldId) {
-        try {
-            const response = await fetch("/local_greeter/api/index.php?action=getFieldByID", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    'field_id': fieldId
-                })
-            });
-            const data = await response.json();
-
-            if(!data.success){
-                throw new Error(data.message);
-            }
-
-            return data.fields;
-
-
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred. Please try again.');
-        }
-    }
-
     // Fetch sports fields when the page loads
     fetchSportsFields();
 
@@ -83,56 +36,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         createEventForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // TODO: Replace with jwt token cookie
-            // Get JWT token from local storage
-            // const token = sessionStorage.getItem('jwt_token');
-            // if (!token) {
-
-            // }
-
-            const userId = getUserData();
-            if(!userId){
+            const token = sessionStorage.getItem('jwt_token');
+            if (!token) {
                 alert('You must be logged in to create an event.');
                 window.location.href = '/local_greeter/login';
                 return;
             }
-
-            const selectedFieldId = createEventForm.sports_field_id.value;
-
-            if(!selectedFieldId){
-                alert('Please select a sports field');
-                return;
-            }
-
-
-
-            const fieldDetails = await getFieldType(selectedFieldId);
-            if(!fieldDetails){
-                alert('Failed to get field details');
-                return;
-            }
-
+            
             const formData = {
                 title: createEventForm.title.value,
                 description: createEventForm.description.value,
+                sport_type: createEventForm.sport_type.value,
                 start_time: createEventForm.start_time.value,
                 end_time: createEventForm.end_time.value,
                 max_participants: createEventForm.max_participants.value,
-                min_participations: createEventForm.min_participations.value || null,
-                field_id: selectedFieldId,
-                field_type: fieldDetails.type,
-            }
-
-            formData.user_id = userId;
-
-            console.log(formData);
+                field_id: createEventForm.sports_field_id.value
+            };
 
             try {
                 const response = await fetch('/local_greeter/api/index.php?action=createEvent', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        //'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(formData),
                 });
@@ -142,29 +68,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (response.ok) {
                     alert(data.message);
                     createEventForm.reset();
-
-                    //RSS NEWS GENERATION
-
-                    try{
-                        const rssResponse = await fetch('/local_greeter/api/index.php?action=sendRssFeed', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                //'Authorization': `Bearer ${token}`
-                            },
-                            body: JSON.stringify({
-                                'event_id': data.event_id,
-                            })
-                        })
-
-                        const rssData = await rssResponse.json();
-                        if(!rssResponse.ok){
-                            console.error('Failed to get rss data');
-                        }
-                    } catch(error) {
-                        console.error('Error:', error);
-                    }
-
                     window.location.href = '/local_greeter/events';
                 } else {
                     alert(data.error || 'Failed to create event');

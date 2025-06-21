@@ -4,12 +4,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const eventIdInput = document.getElementById('event_id');
     const titleInput = document.getElementById('title');
-    const descriptionInput = a= document.getElementById('description');
+    const descriptionInput = document.getElementById('description');
     const sportsFieldSelect = document.getElementById('sports_field_id');
     const startTimeInput = document.getElementById('start_time');
     const endTimeInput = document.getElementById('end_time');
     const maxParticipantsInput = document.getElementById('max_participants');
-    const minParticipationsInput = document.getElementById('min_participations');
 
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('event_id');
@@ -67,7 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 startTimeInput.value = formatDateTimeForInput(event.start_time);
                 endTimeInput.value = formatDateTimeForInput(event.end_time);
                 maxParticipantsInput.value = event.max_participants;
-                minParticipationsInput.value = event.min_participations;
 
                 // Set the selected sports field after they have been loaded
                 sportsFieldSelect.value = event.field_id;
@@ -103,7 +101,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             start_time: startTimeInput.value,
             end_time: endTimeInput.value,
             max_participants: maxParticipantsInput.value,
-            min_participations: minParticipationsInput.value || null,
         };
 
         try {

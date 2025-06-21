@@ -50,11 +50,6 @@ include __DIR__ . '/../templates/header.php';
                     <label for="max_participants">Maximum Participants</label>
                     <input type="number" id="max_participants" name="max_participants" min="1" required>
                 </div>
-                <div class="form-group">
-                    <label for="min_participations">Minimum Participations Required (optional)</label>
-                    <input type="number" id="min_participations" name="min_participations" min="0" placeholder="e.g., 5">
-                    <small>Set a minimum number of past events a user must have joined in this sport to register.</small>
-                </div>
                 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Update Event</button>
