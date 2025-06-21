@@ -687,4 +687,35 @@ body.dark-mode .account-profile-pic {
 
 body.dark-mode .profile-picture-preview-container {
     border-color: var(--dark-primary-color);
+}
+
+/* Screen Reader Only - for accessibility */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* 404 Page Styles */
+.error-page {
+    text-align: center;
+    padding: 100px 0;
+}
+
+.error-page h1 {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.error-page p {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 2rem;
 } 

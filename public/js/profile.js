@@ -34,14 +34,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         //const isLoggedIn = localStorage.getItem('isLoggedIn');
         if (userData) {
-            loggedInContent.style.display = 'block';
-            loggedOutContent.style.display = 'none';
+            loggedInContent.classList.remove('hidden');
+            loggedInContent.classList.add('visible');
+            loggedOutContent.classList.add('hidden');
+            loggedOutContent.classList.remove('visible');
             // Populate simulated user data
             document.getElementById('account-name').textContent = userData.username;
             document.getElementById('account-email').textContent = userData.email;
         } else {
-            loggedInContent.style.display = 'none';
-            loggedOutContent.style.display = 'block';
+            loggedInContent.classList.add('hidden');
+            loggedInContent.classList.remove('visible');
+            loggedOutContent.classList.remove('hidden');
+            loggedOutContent.classList.add('visible');
         }
     }
 

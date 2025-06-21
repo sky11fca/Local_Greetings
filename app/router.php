@@ -48,7 +48,7 @@ class Router {
         ?>
         <main>
             <div class="container">
-                <div style="text-align: center; padding: 100px 0;">
+                <div class="error-page">
                     <h1>404 - Page Not Found</h1>
                     <p>The page you're looking for doesn't exist.</p>
                     <a href="/local_greeter/" class="btn btn-primary">Go Home</a>

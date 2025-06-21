@@ -21,7 +21,7 @@ include __DIR__ . '/../templates/header.php';
     <section id="account-details-section">
         <div class="container mt-5">
             <div class="auth-container">
-                <div id="logged-in-account-content" class="auth-box" style="display: none;">
+                <div id="logged-in-account-content" class="auth-box hidden">
                     <h2>My Account Details</h2>
                     <div class="account-info">
                         <p><strong>Name:</strong> <span id="account-name"></span></p>
@@ -33,7 +33,7 @@ include __DIR__ . '/../templates/header.php';
                     <button id="logoutButton" class="btn btn-secondary btn-block mt-3">Log Out</button>
                 </div>
 
-                <div id="logged-out-account-content" class="auth-box" style="display: none;">
+                <div id="logged-out-account-content" class="auth-box hidden">
                     <h2>Welcome!</h2>
                     <p>Please log in or sign up to view your account details.</p>
                     <a href="/local_greeter/login" class="btn btn-primary btn-block mb-3">Log In</a>

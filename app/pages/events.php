@@ -20,7 +20,7 @@ include __DIR__ . '/../templates/header.php';
 <main>
     <section id="events-list">
         <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div class="header-actions">
                 <h2>All Sports Events</h2>
                 <a href="/local_greeter/create-event" class="btn btn-primary">Create Event</a>
             </div>
@@ -30,7 +30,9 @@ include __DIR__ . '/../templates/header.php';
                 <button class="tab-btn" data-tab="created">My Created Events</button>
             </div>
             <div class="filters">
+                <label for="search-event" class="sr-only">Search events</label>
                 <input type="text" id="search-event" placeholder="Search events...">
+                <label for="sport-type-filter" class="sr-only">Filter by sport type</label>
                 <select id="sport-type-filter">
                     <option value="">All Sport Types</option>
                     <option value="football">Football</option>

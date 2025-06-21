@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sportTypeFilter = document.getElementById('sport-type-filter');
     const searchInput = document.getElementById('search-event');
     const applyFiltersButton = document.getElementById('apply-filters');
-    const searchInput = document.getElementById('search-event');
     const paginationDiv = document.querySelector('.pagination');
     const tabButtons = document.querySelectorAll('.tab-btn');
 
@@ -13,7 +12,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentPage = 1;
     let currentTab = 'public';
 
-<<<<<<< HEAD
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function getUserData(){
+        const token = getCookie('userData');
+        if(!token){
+            return null;
+        }
+        try{
+            const userData = JSON.parse(atob(token.split('.')[1]));
+            return userData.user_id;
+        }catch(e){
+            console.error(e);
+            return null;
+        }
+    }
+
     async function fetchEvents(page, filters = {}) {
         try {
             const offset = (page - 1) * limit;
@@ -34,51 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (filters.search) {
                     url.searchParams.set('search', filters.search);
                 }
-=======
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    }
-
-    function getUserData(){
-        const token = getCookie('userData');
-        if(!token){
-            return null;
-        }
-        try{
-            const userData = JSON.parse(atob(token.split('.')[1]));
-            return userData.user_id;
-        }catch(e){
-            console.error(e);
-            return null;
-        }
-
-    }
-    async function fetchEvents(page, searchQuery=null ,sportType = null) {
-        try {
-            const offset = (page - 1) * limit;
-            //let url = `/api/events?limit=${limit}&offset=${offset}`;
-
-            let url = '/local_greeter/api/index.php?action=getEvents';
-
-            // Add tab-specific endpoint
-            if (currentTab === 'joined') {
-                url = '/local_greeter/api/index.php?action=getJoinedEvents';
-            } else if (currentTab === 'created') {
-                url = `/local_greeter/api/index.php?action=getCreatedEvents`;
             }
-
-            const params = new URLSearchParams();
-            if (sportType) {
-                params.append('sport_type', sportType);
->>>>>>> a02f8bf905bf51d10365550a43f81ca66d79e890
-            }
-            if (searchQuery) {
-                params.append('search', searchQuery);
-            }
-
-            url += `&${params.toString()}`;
 
             const token = sessionStorage.getItem('jwt_token');
             const headers = {
@@ -95,7 +69,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             if(currentTab === 'joined' || currentTab === 'created'){
-<<<<<<< HEAD
                 if (!token) {
                     eventGrid.innerHTML = '<p>You must be logged in to view this section. Please <a href="/local_greeter/login">log in</a>.</p>';
                     paginationDiv.innerHTML = '';
@@ -109,11 +82,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-=======
-                const userId = getUserData();
->>>>>>> a02f8bf905bf51d10365550a43f81ca66d79e890
                 options.body = JSON.stringify({
-                    user_id: userId,
+                    user_id: userData.id,
                 });
             }
 
@@ -167,7 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             eventCard.classList.add('event-card');
             
             eventCard.innerHTML = `
-                <img src="/local_greeter/public/images/default-profile.png" alt="${event.title}">
+                <img src="/local_greeter/public/images/default-profile.png" alt="Event image for ${event.title}">
                 <div class="event-card-content">
                     <h3>${event.title}</h3>
                     <p class="location">${event.address}</p>
@@ -238,11 +208,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function joinEvent(eventId, buttonElement) {
-        // const token = sessionStorage.getItem('jwt_token');
-        // if (!token) {
-
-        // }
-
         const userId = getUserData();
         if(!userId){
             alert('You must be logged in to join an event.');
@@ -259,12 +224,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 ,
                 body: JSON.stringify({
-<<<<<<< HEAD
-                    event_id: eventId
-=======
                     event_id: eventId,
                     user_id: userId,
->>>>>>> a02f8bf905bf51d10365550a43f81ca66d79e890
                 })
             });
 
@@ -301,11 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             button.addEventListener('click', () => {
                 currentPage = i;
-<<<<<<< HEAD
                 fetchEvents(currentPage, { sportType: sportTypeFilter.value });
-=======
-                fetchEvents(currentPage, searchInput.value, sportTypeFilter.value);
->>>>>>> a02f8bf905bf51d10365550a43f81ca66d79e890
             });
             paginationDiv.appendChild(button);
         }
@@ -323,17 +280,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentPage = 1;
             
             // Fetch events for the selected tab
-<<<<<<< HEAD
             applyFilters();
-=======
-            fetchEvents(currentPage, searchInput.value ,sportTypeFilter.value);
->>>>>>> a02f8bf905bf51d10365550a43f81ca66d79e890
         });
     });
 
     function applyFilters() {
         currentPage = 1;
-<<<<<<< HEAD
         const filters = {
             sportType: sportTypeFilter.value,
             search: searchInput.value
@@ -345,11 +297,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initial fetch
     applyFilters();
-=======
-        fetchEvents(currentPage, searchInput.value, sportTypeFilter.value);
-    });
-
-    // Initial fetch
-    fetchEvents(currentPage, searchInput.value, sportTypeFilter.value);
->>>>>>> a02f8bf905bf51d10365550a43f81ca66d79e890
 }); 

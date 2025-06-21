@@ -11,6 +11,14 @@
     color: var(--dark-color);
 }
 
+/* Header Actions - replaces inline styles */
+.header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
 /* Event Tabs */
 .event-tabs {
     display: flex;

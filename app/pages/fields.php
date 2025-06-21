@@ -22,7 +22,9 @@ include __DIR__ . '/../templates/header.php';
         <div class="container">
             <h2>All Sports Fields</h2>
             <div class="filters">
+                <label for="search-field" class="sr-only">Search by location</label>
                 <input type="text" id="search-field" placeholder="Search by location...">
+                <label for="sport-type-filter" class="sr-only">Filter by sport type</label>
                 <select id="sport-type-filter">
                     <option value="">All Sport Types</option>
                     <option value="football">Football</option>
