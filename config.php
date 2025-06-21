@@ -3,8 +3,8 @@
 // Database configuration - TEMPORARILY USING ROOT
 // TODO: Fix bobby user permissions and change back
 define('DB_HOST', '127.0.0.1');
-define('DB_USERNAME', 'root');  // Temporarily using root
-define('DB_PASSWORD', '');      // Leave empty if no root password
+define('DB_USERNAME', 'bobby');  // Temporarily using root
+define('DB_PASSWORD', 'bobbydb3002');      // Leave empty if no root password
 define('DB_NAME', 'local_greeter');
 
 // JWT Secret Key - DO NOT CHANGE THIS VALUE

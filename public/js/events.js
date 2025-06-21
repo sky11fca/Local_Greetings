@@ -265,6 +265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function applyFilters() {
+        currentPage = 1;
         fetchEvents(currentPage, {
             sportType: sportTypeFilter.value,
             search: searchInput.value
@@ -289,6 +290,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initial fetch for the default tab on page load
     applyFilters();
+
+    applyFiltersButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        applyFilters();
+    });
 
     async function joinEvent(eventId) {
         const token = sessionStorage.getItem('jwt_token');
@@ -347,4 +353,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Error leaving event.');
         }
     }
+
+
 });

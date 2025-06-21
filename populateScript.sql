@@ -50,13 +50,13 @@ INSERT INTO SportsFields (name, location, address, type, amenities, opening_hour
 
 -- Insert events
 INSERT INTO Events (title, description, organizer_id, field_id, sport_type, start_time, end_time, max_participants) VALUES
-                                                                                                                        ('Fotbal amical Copou', 'Meci amical de fotbal pentru toți pasionații', 2, 1, 'football', '2023-12-15 17:00:00', '2023-12-15 19:00:00', 14),
+                                                                                                                        ('Fotbal amical Copou', 'Meci amical de fotbal pentru toți pasionații', 2, 1, 'football', '2026-12-15 17:00:00', '2026-12-15 19:00:00', 14),
 
-                                                                                                                        ('Turneu baschet weekend', 'Turneu pentru jucători intermediari și avansați', 3, 2, 'basketball', '2023-12-16 10:00:00', '2023-12-16 14:00:00', 10),
+                                                                                                                        ('Turneu baschet weekend', 'Turneu pentru jucători intermediari și avansați', 3, 2, 'basketball', '2026-12-16 10:00:00', '2026-12-16 14:00:00', 10),
 
-                                                                                                                        ('Sesiune tenis începători', 'Lecții pentru începători cu antrenor certificat', 5, 3, 'tennis', '2023-12-17 11:00:00', '2023-12-17 13:00:00', 4),
+                                                                                                                        ('Sesiune tenis începători', 'Lecții pentru începători cu antrenor certificat', 5, 3, 'tennis', '2026-12-17 11:00:00', '2026-12-17 13:00:00', 4),
 
-                                                                                                                        ('Volei pe plajă', 'Volei recreativ pe nisip', 4, 5, 'volleyball', '2023-12-18 16:00:00', '2023-12-18 18:00:00', 12);
+                                                                                                                        ('Volei pe plajă', 'Volei recreativ pe nisip', 4, 5, 'volleyball', '2026-12-18 16:00:00', '2026-12-18 18:00:00', 12);
 
 -- Insert registration policies
 INSERT INTO RegistrationPolicies (event_id, min_reputation, min_participations, is_manual_approval) VALUES
