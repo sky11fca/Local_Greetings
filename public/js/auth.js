@@ -64,21 +64,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const storeAuthData = (token, userData) =>{
-        const rememberMe = document.getElementById('remember-me');
         // Store JWT token in sessionStorage for authentication
         sessionStorage.setItem('jwt_token', token);
-        // Only store userDataPersist if remember me is checked (keep as requested)
-        if(rememberMe && rememberMe.checked){
-            setCookie('userDataPersist', JSON.stringify(userData), 30);
-        }
     };
 
-    // Check if user is already logged in on page load
-    const checkAuthStatus = () => {
+    // Helper to check if JWT is valid and not expired
+    function isJWTValid() {
         const token = sessionStorage.getItem('jwt_token');
-        const userData = sessionStorage.getItem('user');
-        
-        if (token && userData) {
+        if (!token) return false;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            // Check for expiration
+            if (!payload.exp || Date.now() >= payload.exp * 1000) {
+                sessionStorage.removeItem('jwt_token');
+                return false;
+            }
+            return true;
+        } catch (e) {
+            sessionStorage.removeItem('jwt_token');
+            return false;
+        }
+    }
+
+    const checkAuthStatus = () => {
+        if (isJWTValid()) {
             // User is logged in, redirect to home if on login/register page
             const currentPath = window.location.pathname;
             if (currentPath.includes('/login') || currentPath.includes('/register')) {

@@ -262,7 +262,7 @@ class EventModel
 
         $params = [];
 
-        // Exclude events created by the current user
+        // Exclude events created by the current user (only if user is logged in)
         if ($excludeUserId) {
             $query .= " AND e.organizer_id != :exclude_user_id";
             $params[':exclude_user_id'] = $excludeUserId;
@@ -327,7 +327,7 @@ class EventModel
         $query = "SELECT COUNT(*) FROM Events e WHERE e.end_time > NOW()";
         $params = [];
 
-        // Exclude events created by the current user
+        // Exclude events created by the current user (only if user is logged in)
         if ($excludeUserId) {
             $query .= " AND e.organizer_id != :exclude_user_id";
             $params[':exclude_user_id'] = $excludeUserId;

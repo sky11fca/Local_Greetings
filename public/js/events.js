@@ -15,10 +15,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Check authentication status using only JWT token
     const checkAuth = () => {
         const token = sessionStorage.getItem('jwt_token');
-        const userData = sessionStorage.getItem('user');
+        const userData = getUserFromJWT();
         return { 
             token, 
-            userData: userData ? JSON.parse(userData) : null 
+            userData
         };
     };
 
@@ -34,10 +34,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Helper to check if JWT is valid and not expired
+    function isJWTValid() {
+        const token = sessionStorage.getItem('jwt_token');
+        if (!token) return false;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            // Check for expiration
+            if (!payload.exp || Date.now() >= payload.exp * 1000) {
+                sessionStorage.removeItem('jwt_token');
+                return false;
+            }
+            return true;
+        } catch (e) {
+            sessionStorage.removeItem('jwt_token');
+            return false;
+        }
+    }
+
     async function fetchEvents(page, filters = {}) {
         try {
             const offset = (page - 1) * limit;
-            let url = new URL(window.location.origin + '/local_greeter/api/index.php');
+            // Dynamically determine the base path for the API
+            const basePath = window.location.pathname.split('/').includes('local_greeter') ? '/local_greeter' : '';
+            let url = new URL(window.location.origin + basePath + '/api/index.php');
             
             let action = 'getEvents';
             if (currentTab === 'joined') action = 'getJoinedEvents';
@@ -56,7 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            const { token, userData } = checkAuth();
+            const token = sessionStorage.getItem('jwt_token');
             const headers = {
                 'Content-Type': 'application/json'
             };
@@ -71,30 +91,36 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             if(currentTab === 'joined' || currentTab === 'created'){
-                if (!token) {
+                if (!token || !isJWTValid()) {
                     eventGrid.innerHTML = '<p>You must be logged in to view this section. Please <a href="/local_greeter/login">log in</a>.</p>';
                     paginationDiv.innerHTML = '';
                     return;
                 }
 
-                if (!userData || !userData.id) {
+                const userData = getUserFromJWT();
+                if (!userData || !userData.user_id) {
                     eventGrid.innerHTML = '<p>Your session seems to be invalid. Please <a href="/local_greeter/login">log in</a> again.</p>';
                     paginationDiv.innerHTML = '';
                     return;
                 }
 
                 options.body = JSON.stringify({
-                    user_id: userData.id,
+                    user_id: userData.user_id,
                 });
             }
 
+            // Debug log request
+            console.log('Fetching events:', { url: url.toString(), options });
+
             const response = await fetch(url, options);
             
+            // Debug log response
+            console.log('API response:', response);
+
             if (!response.ok) {
                 if (response.status === 401) {
                     // Token expired or invalid
                     sessionStorage.removeItem('jwt_token');
-                    sessionStorage.removeItem('user');
                     if (currentTab === 'joined' || currentTab === 'created') {
                         eventGrid.innerHTML = '<p>Your session has expired. Please <a href="/local_greeter/login">log in</a> again.</p>';
                         paginationDiv.innerHTML = '';
@@ -105,6 +131,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const data = await response.json();
+
+            // Debug log data
+            console.log('API data:', data);
 
             if (data.events) {
                 renderEvents(data.events);
@@ -146,8 +175,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const { userData } = checkAuth();
-        const userId = userData ? userData.id : null;
+        const userData = getUserFromJWT();
+        const userId = userData ? userData.user_id : null;
 
         events.forEach(event => {
             const eventCard = document.createElement('div');
@@ -181,139 +210,63 @@ document.addEventListener('DOMContentLoaded', async () => {
             const imageUrl = event.image_path ? `/local_greeter/public/images/events/${event.image_path}` : getDefaultImage(event.sport_type);
 
             eventCard.innerHTML = `
-                <img src="${imageUrl}" alt="${event.title}" class="card-img-top">
-                <div class="card-body">
-                    <h3 class="card-title">${event.title}</h3>
-                    <p class="card-text location"><i class="icon-map-pin"></i> ${event.address}</p>
-                    <p class="card-text date"><i class="icon-calendar"></i> ${formatDate(event.start_time)}</p>
-                    <p class="card-text participants"><i class="icon-users"></i> ${event.current_participants}/${event.max_participants} participants</p>
-                    <p class="card-text cost"><i class="icon-dollar-sign"></i> ${event.cost > 0 ? '$' + event.cost : 'Free'}</p>
-                    <p class="card-text description">${event.description}</p>
-                    <div class="event-actions mt-auto">
+                <div class="event-card-image" style="height:200px;overflow:hidden;">
+                    <img src="${imageUrl}" alt="${event.title}" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <div class="event-card-content">
+                    <h3>${event.title}</h3>
+                    <p>${event.description}</p>
+                    <p><strong>Date:</strong> ${formatDate(event.start_time)}</p>
+                    <p><strong>Location:</strong> ${event.field_name || event.address || 'TBD'}</p>
+                    <p><strong>Sport Type:</strong> ${event.sport_type}</p>
+                    <p><strong>Participants:</strong> ${event.current_participants} / ${event.max_participants || '∞'}</p>
+                    <div class="event-card-buttons">
                         ${buttonsHTML}
                     </div>
                 </div>
             `;
+
             eventGrid.appendChild(eventCard);
         });
 
-        // Add event listeners for the 'Join Event' buttons
-        document.querySelectorAll('.join-event-btn').forEach(button => {
-            button.addEventListener('click', async (e) => {
+        // Attach event listeners to join/leave buttons after rendering
+        eventGrid.querySelectorAll('.join-event-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
                 const eventId = e.target.dataset.eventId;
-                await joinEvent(eventId, e.target);
+                await joinEvent(eventId);
             });
         });
-
-        document.querySelectorAll('.leave-event-btn').forEach(button => {
-            button.addEventListener('click', async (e) => {
+        eventGrid.querySelectorAll('.leave-event-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
                 const eventId = e.target.dataset.eventId;
                 await leaveEvent(eventId);
             });
         });
     }
 
-    async function leaveEvent(eventId) {
-        if (!confirm('Are you sure you want to leave this event?')) {
-            return;
-        }
-
-        const token = sessionStorage.getItem('jwt_token');
-        if (!token) {
-            alert('Your session seems to have expired. Please log in again.');
-            window.location.href = '/local_greeter/login';
-            return;
-        }
-
-        try {
-            const response = await fetch('/local_greeter/api/index.php?action=leaveEvent', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ event_id: eventId })
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                alert('You have successfully left the event.');
-                // Re-fetch events to update the list and button states
-                applyFilters();
-            } else {
-                throw new Error(data.message || 'Failed to leave event.');
-            }
-        } catch (error) {
-            console.error('Error leaving event:', error);
-            alert(`Could not leave event: ${error.message}`);
-        }
-    }
-
-    async function joinEvent(eventId, buttonElement) {
-        const token = sessionStorage.getItem('jwt_token');
-        if (!token) {
-            alert('You must be logged in to join an event.');
-            window.location.href = '/local_greeter/login';
-            return;
-        }
-
-        try {
-            const response = await fetch("/local_greeter/api/index.php?action=joinEvent", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ event_id: eventId })
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                alert(data.message);
-                // Update the button to show "Leave Event"
-                buttonElement.textContent = 'Leave Event';
-                buttonElement.classList.remove('btn-primary', 'join-event-btn');
-                buttonElement.classList.add('btn-danger', 'leave-event-btn');
-                buttonElement.dataset.eventId = eventId;
-                
-                // Add event listener for the new leave button
-                buttonElement.addEventListener('click', async (e) => {
-                    const eventId = e.target.dataset.eventId;
-                    await leaveEvent(eventId);
-                });
-                
-                // Re-fetch events to update participant count
-                fetchEvents(currentPage, { sportType: sportTypeFilter.value });
-            } else {
-                alert(data.message || 'Failed to join event');
-            }
-        } catch (error) {
-            console.error('Error joining event:', error);
-            alert('An error occurred. Please try again.');
-        }
-    }
-
     function renderPagination(totalEvents) {
-        paginationDiv.innerHTML = '';
         const totalPages = Math.ceil(totalEvents / limit);
+        let paginationHTML = '<nav><ul class="pagination">';
 
-        if (totalPages <= 1) return;
-
-        for (let i = 1; i <= totalPages; i++) {
-            const button = document.createElement('button');
-            button.textContent = i;
-            button.classList.add('btn');
-            if (i === currentPage) {
-                button.classList.add('active');
-            }
-            button.addEventListener('click', () => {
-                currentPage = i;
-                fetchEvents(currentPage, { sportType: sportTypeFilter.value });
-            });
-            paginationDiv.appendChild(button);
+        if (currentPage > 1) {
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="1">First</a></li>`;
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a></li>`;
         }
+
+        if (currentPage < totalPages) {
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage + 1}">Next</a></li>`;
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">Last</a></li>`;
+        }
+
+        paginationHTML += '</ul></nav>';
+        paginationDiv.innerHTML = paginationHTML;
+    }
+
+    function applyFilters() {
+        fetchEvents(currentPage, {
+            sportType: sportTypeFilter.value,
+            search: searchInput.value
+        });
     }
 
     // Tab switching functionality
@@ -322,27 +275,74 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Update active tab
             tabButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            
             // Update current tab and reset page
             currentTab = button.dataset.tab;
             currentPage = 1;
-            
+            // Debug log
+            console.log('Tab clicked:', button.textContent, 'currentTab:', currentTab);
             // Fetch events for the selected tab
             applyFilters();
         });
     });
 
-    function applyFilters() {
-        currentPage = 1;
-        const filters = {
-            sportType: sportTypeFilter.value,
-            search: searchInput.value
-        };
-        fetchEvents(currentPage, filters);
+    // Initial fetch for the default tab on page load
+    applyFilters();
+
+    async function joinEvent(eventId) {
+        const token = sessionStorage.getItem('jwt_token');
+        if (!token) {
+            alert('You must be logged in to join an event.');
+            window.location.href = '/local_greeter/login';
+            return;
+        }
+        try {
+            const basePath = window.location.pathname.split('/').includes('local_greeter') ? '/local_greeter' : '';
+            const response = await fetch(window.location.origin + basePath + '/api/index.php?action=joinEvent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ event_id: eventId })
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                alert('You have joined the event!');
+                applyFilters();
+            } else {
+                alert(data.message || 'Failed to join event.');
+            }
+        } catch (error) {
+            alert('Error joining event.');
+        }
     }
 
-    applyFiltersButton.addEventListener('click', applyFilters);
-
-    // Initial fetch
-    applyFilters();
-}); 
+    async function leaveEvent(eventId) {
+        const token = sessionStorage.getItem('jwt_token');
+        if (!token) {
+            alert('You must be logged in to leave an event.');
+            window.location.href = '/local_greeter/login';
+            return;
+        }
+        try {
+            const basePath = window.location.pathname.split('/').includes('local_greeter') ? '/local_greeter' : '';
+            const response = await fetch(window.location.origin + basePath + '/api/index.php?action=leaveEvent', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ event_id: eventId })
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                alert('You have left the event!');
+                applyFilters();
+            } else {
+                alert(data.message || 'Failed to leave event.');
+            }
+        } catch (error) {
+            alert('Error leaving event.');
+        }
+    }
+});

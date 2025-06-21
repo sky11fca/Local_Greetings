@@ -5,10 +5,6 @@ function logout() {
     // Clear session storage
     sessionStorage.removeItem('jwt_token');
     
-    // Clear cookies
-    document.cookie = 'userDataPersist=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    document.cookie = 'userData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    
     // Redirect to home page
     window.location.href = '/local_greeter/';
 }

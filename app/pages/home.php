@@ -55,19 +55,49 @@ require_once __DIR__ . '/../helpers/TemplateHelper.php';
 </main>
 
 <script>
+// Helper to decode user info from JWT
+function getUserFromJWT() {
+    const token = sessionStorage.getItem('jwt_token');
+    if (!token) return null;
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.data || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+// Helper to check if JWT is valid and not expired
+function isJWTValid() {
+    const token = sessionStorage.getItem('jwt_token');
+    if (!token) return false;
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        // Check for expiration
+        if (!payload.exp || Date.now() >= payload.exp * 1000) {
+            sessionStorage.removeItem('jwt_token');
+            return false;
+        }
+        return true;
+    } catch (e) {
+        sessionStorage.removeItem('jwt_token');
+        return false;
+    }
+}
+
 // Check authentication status and update homepage UI
 function updateHomepageUI() {
     const token = sessionStorage.getItem('jwt_token');
-    const userData = sessionStorage.getItem('user');
+    const userData = getUserFromJWT();
     const signupBtn = document.getElementById('signup-btn');
     
-    if (token && userData) {
+    if (token && userData && isJWTValid()) {
         // User is logged in - hide signup button
         if (signupBtn) {
             signupBtn.style.display = 'none';
         }
     } else {
-        // User is not logged in - show signup button
+        // User is not logged in or token is expired - show signup button
         if (signupBtn) {
             signupBtn.style.display = 'inline-block';
         }
@@ -79,7 +109,7 @@ document.addEventListener('DOMContentLoaded', updateHomepageUI);
 
 // Update UI when storage changes (for multi-tab support)
 window.addEventListener('storage', (e) => {
-    if (e.key === 'jwt_token' || e.key === 'user') {
+    if (e.key === 'jwt_token') {
         updateHomepageUI();
     }
 });
