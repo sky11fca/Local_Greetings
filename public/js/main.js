@@ -1,5 +1,14 @@
 console.log('main.js loaded and executing.');
 
+// Global logout function
+function logout() {
+    // Clear session storage
+    sessionStorage.removeItem('jwt_token');
+    
+    // Redirect to home page
+    window.location.href = '/local_greeter/';
+}
+
 // You can add any interactive JavaScript here
 
 document.addEventListener('DOMContentLoaded', () => {

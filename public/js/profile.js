@@ -3,32 +3,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const loggedOutContent = document.getElementById('logged-out-account-content');
     const logoutButton = document.getElementById('logoutButton');
 
-    function getUserDataFromSession() {
-        const userJSON = sessionStorage.getItem('user');
-        if (!userJSON) {
+    // Helper to decode user info from JWT
+    function getUserFromJWT() {
+        const token = sessionStorage.getItem('jwt_token');
+        if (!token) return null;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.data || null;
+        } catch (e) {
             return null;
         }
+    }
+
+    // Helper to check if JWT is valid and not expired
+    function isJWTValid() {
+        const token = sessionStorage.getItem('jwt_token');
+        if (!token) return false;
         try {
-            return JSON.parse(userJSON);
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            // Check for expiration
+            if (!payload.exp || Date.now() >= payload.exp * 1000) {
+                sessionStorage.removeItem('jwt_token');
+                return false;
+            }
+            return true;
         } catch (e) {
-            console.error("Error parsing user data from sessionStorage:", e);
-            return null;
+            sessionStorage.removeItem('jwt_token');
+            return false;
         }
     }
 
     function updateAccountView() {
         const token = sessionStorage.getItem('jwt_token');
-        const userData = getUserDataFromSession();
-
-        if (token && userData) {
+        const userData = getUserFromJWT();
+        if (token && userData && isJWTValid()) {
             loggedInContent.classList.remove('hidden');
             loggedInContent.classList.add('visible');
             loggedOutContent.classList.add('hidden');
             loggedOutContent.classList.remove('visible');
-
             const accountNameEl = document.getElementById('account-name');
             const accountEmailEl = document.getElementById('account-email');
-
             if(accountNameEl) accountNameEl.textContent = userData.username;
             if(accountEmailEl) accountEmailEl.textContent = userData.email;
         } else {
@@ -41,10 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
-            document.cookie = "userData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie = "userDataPersist=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            sessionStorage.clear();
-
+            sessionStorage.removeItem('jwt_token');
             // Redirect to login page after logout
             window.location.href = '/local_greeter/login';
         });

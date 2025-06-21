@@ -13,31 +13,16 @@ $additionalScripts = [
     "/local_greeter/public/js/auth.js"
 ];
 
-// Inline script for user authentication check
-$inlineScripts = "
-    document.addEventListener('DOMContentLoaded', () => {
-        function getCookie(name) {
-            const value = `; \${document.cookie}`;
-            const parts = value.split(`; \${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
-
-        const userData = getCookie('userData');
-        if(userData){
-            window.location.href = '/local_greeter/account';
-        }
-    });
-";
-
 // Include the header template
 include __DIR__ . '/../templates/header.php';
 ?>
 
 <main>
-    <div class="container mt-5">
+    <div class="container mt-5" style="margin-top: 60px; max-width: 480px;">
         <div class="auth-container">
             <div class="auth-box">
                 <h2>Log In</h2>
+                <div id="loginMessage" class="message-box hidden"></div>
                 <form id="loginForm">
                     <div class="form-group">
                         <label for="email">Email address</label>

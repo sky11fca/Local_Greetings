@@ -36,13 +36,77 @@ $currentPage = $currentPage ?? "home";
                     <li><a href="<?php echo TemplateHelper::url(); ?>" class="<?php echo TemplateHelper::activeClass('home'); ?>">Home</a></li>
                     <li><a href="<?php echo TemplateHelper::url('events'); ?>" class="<?php echo TemplateHelper::activeClass('events'); ?>">Events</a></li>
                 </ul>
-                <?php if (TemplateHelper::isLoggedIn()): ?>
-                    <a href="<?php echo TemplateHelper::url('account'); ?>" class="btn btn-primary profile-link">Profile</a>
-                <?php else: ?>
-                    <a href="<?php echo TemplateHelper::url('login'); ?>" class="btn btn-primary profile-link">Login</a>
-                <?php endif; ?>
+                <div class="auth-buttons">
+                    <!-- Login button (shown when not logged in) -->
+                    <a href="<?php echo TemplateHelper::url('login'); ?>" class="btn btn-primary profile-link" id="login-btn">Login</a>
+                    
+                    <!-- User navigation (shown when logged in) -->
+                    <div class="user-nav hidden" id="user-nav">
+                        <a href="<?php echo TemplateHelper::url('account'); ?>" class="btn btn-primary profile-link">Profile</a>
+                    </div>
+                </div>
             </nav>
         </div>
     </header>
+
+    <script>
+        // Helper to decode user info from JWT
+        function getUserFromJWT() {
+            const token = sessionStorage.getItem('jwt_token');
+            if (!token) return null;
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return payload.data || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Helper to check if JWT is valid and not expired
+        function isJWTValid() {
+            const token = sessionStorage.getItem('jwt_token');
+            if (!token) return false;
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                // Check for expiration
+                if (!payload.exp || Date.now() >= payload.exp * 1000) {
+                    sessionStorage.removeItem('jwt_token');
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                sessionStorage.removeItem('jwt_token');
+                return false;
+            }
+        }
+
+        // Check authentication status and update UI
+        function updateAuthUI() {
+            const token = sessionStorage.getItem('jwt_token');
+            const userData = getUserFromJWT();
+            const loginBtn = document.getElementById('login-btn');
+            const userNav = document.getElementById('user-nav');
+            
+            if (token && userData && isJWTValid()) {
+                // User is logged in
+                if (loginBtn) loginBtn.classList.add('hidden');
+                if (userNav) userNav.classList.remove('hidden');
+            } else {
+                // User is not logged in or token is expired
+                if (loginBtn) loginBtn.classList.remove('hidden');
+                if (userNav) userNav.classList.add('hidden');
+            }
+        }
+        
+        // Update UI on page load
+        document.addEventListener('DOMContentLoaded', updateAuthUI);
+        
+        // Update UI when storage changes (for multi-tab support)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'jwt_token') {
+                updateAuthUI();
+            }
+        });
+    </script>
 </body>
 </html> 

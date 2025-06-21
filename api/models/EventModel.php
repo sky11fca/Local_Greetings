@@ -68,7 +68,7 @@ class EventModel
     FROM Events e 
     JOIN Users u on e.organizer_id = u.user_id
     JOIN SportsFields sf ON e.field_id = sf.field_id
-    WHERE e.event_id IN ( SELECT event_id FROM EventParticipants WHERE user_id = :user_id AND status = 'confirmed')";
+    WHERE e.event_id IN ( SELECT event_id FROM EventParticipants WHERE user_id = :user_id AND status = 'confirmed') AND e.organizer_id != :user_id";
 
         $params = ['user_id' => $userId];
 
@@ -262,7 +262,7 @@ class EventModel
 
         $params = [];
 
-        // Exclude events created by the current user
+        // Exclude events created by the current user (only if user is logged in)
         if ($excludeUserId) {
             $query .= " AND e.organizer_id != :exclude_user_id";
             $params[':exclude_user_id'] = $excludeUserId;
@@ -327,7 +327,7 @@ class EventModel
         $query = "SELECT COUNT(*) FROM Events e WHERE e.end_time > NOW()";
         $params = [];
 
-        // Exclude events created by the current user
+        // Exclude events created by the current user (only if user is logged in)
         if ($excludeUserId) {
             $query .= " AND e.organizer_id != :exclude_user_id";
             $params[':exclude_user_id'] = $excludeUserId;

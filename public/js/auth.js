@@ -12,17 +12,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const expires = `expires=${date.toUTCString()}`;
         document.cookie = `${name}=${value};${expires};path=/`;
     }
+    
+    const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+    
     const showMessage = (element, message, type = 'error') => {
         if (!element) return;
 
         element.textContent = message;
         element.className = `message-box ${type}`;
-        element.style.display = 'block';
+        element.classList.remove('hidden');
         setTimeout(() => {
-            element.style.display = 'none';
+            element.classList.add('hidden');
         }, 3000);
     };
-
 
     const submitForm = async (url, formData, messageElement) =>{
         try{
@@ -36,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if(!response.ok || !data.success){
-                throw new Error(data.message);
+                throw new Error(data.message || 'An error occurred');
             }
             return data;
         } catch(error){
@@ -45,17 +51,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Helper to decode user info from JWT
+    function getUserFromJWT() {
+        const token = sessionStorage.getItem('jwt_token');
+        if (!token) return null;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.data || null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     const storeAuthData = (token, userData) =>{
-        const rememberMe = document.getElementById('remember-me');
         // Store JWT token in sessionStorage for authentication
         sessionStorage.setItem('jwt_token', token);
-        sessionStorage.setItem('user', JSON.stringify(userData));
-        setCookie('userData', token);
-        if(rememberMe.checked){
-            setCookie('userDataPersist', JSON.stringify(userData), 30);
-        }
-
     };
+
+    // Helper to check if JWT is valid and not expired
+    function isJWTValid() {
+        const token = sessionStorage.getItem('jwt_token');
+        if (!token) return false;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            // Check for expiration
+            if (!payload.exp || Date.now() >= payload.exp * 1000) {
+                sessionStorage.removeItem('jwt_token');
+                return false;
+            }
+            return true;
+        } catch (e) {
+            sessionStorage.removeItem('jwt_token');
+            return false;
+        }
+    }
+
+    const checkAuthStatus = () => {
+        if (isJWTValid()) {
+            // User is logged in, redirect to home if on login/register page
+            const currentPath = window.location.pathname;
+            if (currentPath.includes('/login') || currentPath.includes('/register')) {
+                window.location.href = '/local_greeter/home';
+            }
+        }
+    };
+
+    // Run auth check on page load
+    checkAuthStatus();
 
     if(loginForm){
         loginForm.addEventListener('submit', async (e) =>{
@@ -67,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showMessage(loginMessage, "Please enter email and password");
                 return;
             }
+            
             const result = await submitForm(
                 "/local_greeter/api/index.php?action=login",
                 {
@@ -76,27 +119,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 loginMessage,
             );
 
-            if(result.success){
-                showMessage(loginMessage, "Login successful");
+            if(result && result.success){
+                showMessage(loginMessage, "Login successful", "success");
 
                 storeAuthData(result.token, {
                     id: result.data.user_id,
                     username: result.data.username,
                     email: result.data.email
                 });
+                
                 setTimeout(() => {
                     window.location.href = '/local_greeter/home';
                 }, 1500)
-
             }
         })
     }
+    
     if(registerForm){
         registerForm.addEventListener('submit', async (e) =>{
             e.preventDefault();
             const {username, email, password, 'confirm-password' : confirmPassword} = registerForm;
-            if(!email.value  || !password.value || !confirmPassword.value){
-                showMessage(registerMessage, "Please enter email, password and confirm password");
+            if(!username.value || !email.value  || !password.value || !confirmPassword.value){
+                showMessage(registerMessage, "Please fill in all fields");
                 return;
             }
             if(password.value !== confirmPassword.value){
@@ -117,11 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     password: password.value
                 },
                 registerMessage,
-
             );
 
             if(result?.success){
-                showMessage(registerMessage, "Registration successful");
+                showMessage(registerMessage, "Registration successful", "success");
                 setTimeout(() => {
                     window.location.href = '/local_greeter/login';
                 }, 1500)
