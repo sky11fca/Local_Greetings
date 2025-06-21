@@ -19,17 +19,24 @@ class TemplateHelper {
      * Check if user is logged in
      */
     public static function isLoggedIn() {
-        return isset($_COOKIE['userData']);
+        // Check for Authorization header in case of API requests
+        $headers = getallheaders();
+        if (isset($headers['Authorization']) && strpos($headers['Authorization'], 'Bearer ') === 0) {
+            return true;
+        }
+        
+        // For server-side checks, we can't access sessionStorage, so we'll rely on the API
+        // The frontend will handle the actual authentication state
+        return false;
     }
     
     /**
-     * Get user data from cookie
+     * Get user data from JWT token
+     * Note: This requires the token to be passed or stored server-side
      */
     public static function getUserData() {
-        if (self::isLoggedIn()) {
-            $userData = $_COOKIE['userData'];
-            return json_decode($userData, true);
-        }
+        // For server-side rendering, we can't access the JWT token directly
+        // The frontend JavaScript will handle user data from sessionStorage
         return null;
     }
     

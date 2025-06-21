@@ -2,12 +2,19 @@
 
 class Database
 {
-    private $host = "127.0.0.1";
-    private $username = "bobby";
-    private $password = "bobbydb3002";
-    private $dbname = "local_greeter";
+    private $host;
+    private $username;
+    private $password;
+    private $dbname;
     private $conn;
 
+    public function __construct()
+    {
+        $this->host = DB_HOST;
+        $this->username = DB_USERNAME;
+        $this->password = DB_PASSWORD;
+        $this->dbname = DB_NAME;
+    }
 
     public function connect()
     {
@@ -24,7 +31,7 @@ class Database
                 ]
             );
         } catch (PDOException $e) {
-            die("Database connection failed: " . $e->getMessage());
+            throw new Exception("Database connection failed: " . $e->getMessage());
         }
 
         return $this->conn;

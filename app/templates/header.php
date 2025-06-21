@@ -36,13 +36,47 @@ $currentPage = $currentPage ?? "home";
                     <li><a href="<?php echo TemplateHelper::url(); ?>" class="<?php echo TemplateHelper::activeClass('home'); ?>">Home</a></li>
                     <li><a href="<?php echo TemplateHelper::url('events'); ?>" class="<?php echo TemplateHelper::activeClass('events'); ?>">Events</a></li>
                 </ul>
-                <?php if (TemplateHelper::isLoggedIn()): ?>
-                    <a href="<?php echo TemplateHelper::url('account'); ?>" class="btn btn-primary profile-link">Profile</a>
-                <?php else: ?>
-                    <a href="<?php echo TemplateHelper::url('login'); ?>" class="btn btn-primary profile-link">Login</a>
-                <?php endif; ?>
+                <div class="auth-buttons">
+                    <!-- Login button (shown when not logged in) -->
+                    <a href="<?php echo TemplateHelper::url('login'); ?>" class="btn btn-primary profile-link" id="login-btn">Login</a>
+                    
+                    <!-- User navigation (shown when logged in) -->
+                    <div class="user-nav hidden" id="user-nav">
+                        <a href="<?php echo TemplateHelper::url('account'); ?>" class="btn btn-primary profile-link">Profile</a>
+                    </div>
+                </div>
             </nav>
         </div>
     </header>
+
+    <script>
+        // Check authentication status and update UI
+        function updateAuthUI() {
+            const token = sessionStorage.getItem('jwt_token');
+            const userData = sessionStorage.getItem('user');
+            const loginBtn = document.getElementById('login-btn');
+            const userNav = document.getElementById('user-nav');
+            
+            if (token && userData) {
+                // User is logged in
+                if (loginBtn) loginBtn.classList.add('hidden');
+                if (userNav) userNav.classList.remove('hidden');
+            } else {
+                // User is not logged in
+                if (loginBtn) loginBtn.classList.remove('hidden');
+                if (userNav) userNav.classList.add('hidden');
+            }
+        }
+        
+        // Update UI on page load
+        document.addEventListener('DOMContentLoaded', updateAuthUI);
+        
+        // Update UI when storage changes (for multi-tab support)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'jwt_token' || e.key === 'user') {
+                updateAuthUI();
+            }
+        });
+    </script>
 </body>
 </html> 

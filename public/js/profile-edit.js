@@ -8,14 +8,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Get user data from sessionStorage
-        const userData = JSON.parse(sessionStorage.getItem('user') || '{}');
-        if (!userData || !userData.username) {
-            window.location.href = '/local_greeter/login';
-            return;
+        // Helper to decode user info from JWT
+        function getUserFromJWT() {
+            if (!token) return null;
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return payload.data || null;
+            } catch (e) {
+                return null;
+            }
         }
 
-        // Populate form with actual user data
+        // Replace userData usage with getUserFromJWT
+        const userData = getUserFromJWT();
+        if (!userData || !userData.username) {
+            // Handle not logged in or missing user info
+            window.location.href = '/local_greeter/login';
+        }
         document.getElementById('username').value = userData.username || '';
         document.getElementById('email').value = userData.email || '';
     }

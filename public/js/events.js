@@ -12,6 +12,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentPage = 1;
     let currentTab = 'public';
 
+    // Check authentication status using only JWT token
+    const checkAuth = () => {
+        const token = sessionStorage.getItem('jwt_token');
+        const userData = sessionStorage.getItem('user');
+        return { 
+            token, 
+            userData: userData ? JSON.parse(userData) : null 
+        };
+    };
+
+    // Helper to decode user info from JWT
+    function getUserFromJWT() {
+        const token = sessionStorage.getItem('jwt_token');
+        if (!token) return null;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.data || null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     async function fetchEvents(page, filters = {}) {
         try {
             const offset = (page - 1) * limit;
@@ -34,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            const token = sessionStorage.getItem('jwt_token');
+            const { token, userData } = checkAuth();
             const headers = {
                 'Content-Type': 'application/json'
             };
@@ -55,7 +77,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-                const userData = JSON.parse(sessionStorage.getItem('user'));
                 if (!userData || !userData.id) {
                     eventGrid.innerHTML = '<p>Your session seems to be invalid. Please <a href="/local_greeter/login">log in</a> again.</p>';
                     paginationDiv.innerHTML = '';
@@ -68,18 +89,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const response = await fetch(url, options);
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    // Token expired or invalid
+                    sessionStorage.removeItem('jwt_token');
+                    sessionStorage.removeItem('user');
+                    if (currentTab === 'joined' || currentTab === 'created') {
+                        eventGrid.innerHTML = '<p>Your session has expired. Please <a href="/local_greeter/login">log in</a> again.</p>';
+                        paginationDiv.innerHTML = '';
+                        return;
+                    }
+                }
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
             const data = await response.json();
 
-            if (response.ok) {
+            if (data.events) {
                 renderEvents(data.events);
-                renderPagination(data.total_events || 0);
+                renderPagination(data.total_events || data.events.length);
             } else {
-                console.error('Failed to fetch events:', data.error || data);
+                console.error('Invalid response format:', data);
                 eventGrid.innerHTML = '<p>Failed to load events. Please try again later.</p>';
             }
         } catch (error) {
             console.error('Error fetching events:', error);
-            eventGrid.innerHTML = '<p>An error occurred. Please try again later.</p>';
+            eventGrid.innerHTML = '<p>An error occurred while loading events. Please try again later.</p>';
         }
     }
 
@@ -96,9 +132,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             'football': '/local_greeter/public/images/football.jpg',
             'basketball': '/local_greeter/public/images/basketball.jpeg',
             'tennis': '/local_greeter/public/images/tennis.jpg',
-            
-            // Add other sport types and their default images here
-            'default': '/local_greeter/public/images/other.jpeg'
+            'volleyball': '/local_greeter/public/images/volleyball.jpg',
+            'multi-sport': '/local_greeter/public/images/other.jpg',
+            'default': '/local_greeter/public/images/other.jpg'
         };
         return defaultImages[sportType.toLowerCase()] || defaultImages['default'];
     }
@@ -110,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const userData = JSON.parse(sessionStorage.getItem('user'));
+        const { userData } = checkAuth();
         const userId = userData ? userData.id : null;
 
         events.forEach(event => {
@@ -203,7 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (response.ok && data.success) {
                 alert('You have successfully left the event.');
-                // Re-fetch events to update the list
+                // Re-fetch events to update the list and button states
                 applyFilters();
             } else {
                 throw new Error(data.message || 'Failed to leave event.');
@@ -234,14 +270,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const data = await response.json();
 
-            if (response.ok) {
+            if (response.ok && data.success) {
                 alert(data.message);
-                // Update the UI to reflect the joined status
-                buttonElement.textContent = 'Joined';
-                buttonElement.disabled = true;
-                buttonElement.classList.remove('btn-primary');
-                buttonElement.classList.add('btn-secondary');
-                // Re-fetch events to update participant count and cost per participant
+                // Update the button to show "Leave Event"
+                buttonElement.textContent = 'Leave Event';
+                buttonElement.classList.remove('btn-primary', 'join-event-btn');
+                buttonElement.classList.add('btn-danger', 'leave-event-btn');
+                buttonElement.dataset.eventId = eventId;
+                
+                // Add event listener for the new leave button
+                buttonElement.addEventListener('click', async (e) => {
+                    const eventId = e.target.dataset.eventId;
+                    await leaveEvent(eventId);
+                });
+                
+                // Re-fetch events to update participant count
                 fetchEvents(currentPage, { sportType: sportTypeFilter.value });
             } else {
                 alert(data.message || 'Failed to join event');
@@ -255,6 +298,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderPagination(totalEvents) {
         paginationDiv.innerHTML = '';
         const totalPages = Math.ceil(totalEvents / limit);
+
+        if (totalPages <= 1) return;
 
         for (let i = 1; i <= totalPages; i++) {
             const button = document.createElement('button');

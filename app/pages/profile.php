@@ -27,7 +27,7 @@ include __DIR__ . '/../templates/header.php';
 
 <main class="profile-page">
     <section id="profile-edit-section">
-        <div class="container mt-5">
+        <div class="container mt-5" style="margin-top: 60px; max-width: 480px;">
             <div class="auth-container">
                 <div class="auth-box">
                     <h2>Edit Your Profile</h2>
