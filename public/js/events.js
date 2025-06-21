@@ -190,8 +190,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // In "My Created Events" tab - always show edit button
                 buttonsHTML = `<a href="/local_greeter/edit-event?event_id=${event.event_id}" class="btn btn-secondary">Edit Event</a>`;
             } else if (currentTab === 'joined') {
-                // In "My Joined Events" tab - always show leave button
-                buttonsHTML = `<button class="btn btn-danger leave-event-btn" data-event-id="${event.event_id}">Leave Event</button>`;
+                // In "My Joined Events" tab - show leave button only if not organizer
+                if (!isUserCreator) {
+                    buttonsHTML = `<button class="btn btn-danger leave-event-btn" data-event-id="${event.event_id}">Leave Event</button>`;
+                }
             } else {
                 // In "Public Events" tab - show appropriate button based on relationship
                 if (isUserCreator) {

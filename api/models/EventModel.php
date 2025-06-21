@@ -68,7 +68,7 @@ class EventModel
     FROM Events e 
     JOIN Users u on e.organizer_id = u.user_id
     JOIN SportsFields sf ON e.field_id = sf.field_id
-    WHERE e.event_id IN ( SELECT event_id FROM EventParticipants WHERE user_id = :user_id AND status = 'confirmed')";
+    WHERE e.event_id IN ( SELECT event_id FROM EventParticipants WHERE user_id = :user_id AND status = 'confirmed') AND e.organizer_id != :user_id";
 
         $params = ['user_id' => $userId];
 
