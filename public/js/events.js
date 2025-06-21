@@ -12,26 +12,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentPage = 1;
     let currentTab = 'public';
 
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    }
-
-    function getUserData(){
-        const token = getCookie('userData');
-        if(!token){
-            return null;
-        }
-        try{
-            const userData = JSON.parse(atob(token.split('.')[1]));
-            return userData.user_id;
-        }catch(e){
-            console.error(e);
-            return null;
-        }
-    }
-
     async function fetchEvents(page, filters = {}) {
         try {
             const offset = (page - 1) * limit;
@@ -179,6 +159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const token = sessionStorage.getItem('jwt_token');
         if (!token) {
             alert('Your session seems to have expired. Please log in again.');
+            window.location.href = '/local_greeter/login';
             return;
         }
 
@@ -208,25 +189,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function joinEvent(eventId, buttonElement) {
-        const userId = getUserData();
-        if(!userId){
+        const token = sessionStorage.getItem('jwt_token');
+        if (!token) {
             alert('You must be logged in to join an event.');
             window.location.href = '/local_greeter/login';
             return;
         }
 
         try {
-            const response = await fetch("/local_greeter/api/index.php?action=joinEvent" , {
+            const response = await fetch("/local_greeter/api/index.php?action=joinEvent", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                }
-                ,
-                body: JSON.stringify({
-                    event_id: eventId,
-                    user_id: userId,
-                })
+                },
+                body: JSON.stringify({ event_id: eventId })
             });
 
             const data = await response.json();

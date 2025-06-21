@@ -102,6 +102,9 @@ try{
     }
     else if($_SERVER['REQUEST_METHOD']==='DELETE'){
         switch ($endpoint){
+            case 'leaveEvent':
+                $eventController->leaveEvent();
+                break;
             default:
                 http_response_code(404);
                 echo json_encode(['success' => false, 'message' => 'API endpoint not found']);
