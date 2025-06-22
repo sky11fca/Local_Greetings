@@ -15,7 +15,9 @@ class Router {
             'profile' => 'profile',
             'create-event' => 'create-event',
             'edit-event' => 'edit-event',
-            'event-history' => 'event-history'
+            'event-history' => 'event-history',
+            'admin' => 'admin',
+            'admin-login' => 'admin-login'
         ];
     }
     

@@ -1,11 +1,12 @@
 <?php
 
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 0);
-error_reporting(0);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/config/Database.php';
+require_once __DIR__ . '/models/UserModel.php';
 require_once __DIR__ . '/controllers/AuthController.php';
 require_once __DIR__ . '/controllers/UserController.php';
 require_once __DIR__ . '/controllers/EventController.php';
@@ -70,6 +71,68 @@ try {
             case 'getCreatedEvents':
                 $eventController->listCreatedEvents();
                 break;
+            case 'checkAdmin':
+                // Admin check endpoint
+                $data = json_decode(file_get_contents('php://input'), true);
+                
+                if (empty($data['user_id'])) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'message' => 'User ID is required']);
+                    break;
+                }
+                
+                $userModel = new UserModel($db);
+                $user = $userModel->getUserById($data['user_id']);
+                
+                if (!$user) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'message' => 'User not found']);
+                    break;
+                }
+                
+                $isAdmin = isset($user['is_admin']) && $user['is_admin'] == 1;
+                
+                echo json_encode([
+                    'success' => true,
+                    'is_admin' => $isAdmin,
+                    'user' => [
+                        'user_id' => $user['user_id'],
+                        'username' => $user['username'],
+                        'email' => $user['email'],
+                        'is_admin' => $isAdmin
+                    ]
+                ]);
+                break;
+            case 'adminStats':
+                require_once __DIR__ . '/admin/stats.php';
+                break;
+            case 'adminActivity':
+                require_once __DIR__ . '/admin/activity.php';
+                break;
+            case 'adminHealth':
+                require_once __DIR__ . '/admin/health.php';
+                break;
+            case 'adminDatabaseStatus':
+                require_once __DIR__ . '/admin/database-status.php';
+                break;
+            case 'adminEmailStatus':
+                require_once __DIR__ . '/admin/email-status.php';
+                break;
+            case 'adminLogs':
+                require_once __DIR__ . '/admin/logs.php';
+                break;
+            case 'adminUsers':
+                require_once __DIR__ . '/admin/users.php';
+                break;
+            case 'adminEvents':
+                require_once __DIR__ . '/admin/events.php';
+                break;
+            case 'adminFields':
+                require_once __DIR__ . '/admin/fields.php';
+                break;
+            case 'adminTestDatabase':
+                require_once __DIR__ . '/admin/test-database.php';
+                break;
             default:
                 http_response_code(404);
                 echo json_encode(['success' => false, 'message' => 'API endpoint not found']);
@@ -92,6 +155,36 @@ try {
                 break;
             case 'getSportsFields':
                 $sportsFieldController->listAllFieldsSimple();
+                break;
+            case 'adminStats':
+                require_once __DIR__ . '/admin/stats.php';
+                break;
+            case 'adminActivity':
+                require_once __DIR__ . '/admin/activity.php';
+                break;
+            case 'adminHealth':
+                require_once __DIR__ . '/admin/health.php';
+                break;
+            case 'adminDatabaseStatus':
+                require_once __DIR__ . '/admin/database-status.php';
+                break;
+            case 'adminEmailStatus':
+                require_once __DIR__ . '/admin/email-status.php';
+                break;
+            case 'adminLogs':
+                require_once __DIR__ . '/admin/logs.php';
+                break;
+            case 'adminUsers':
+                require_once __DIR__ . '/admin/users.php';
+                break;
+            case 'adminEvents':
+                require_once __DIR__ . '/admin/events.php';
+                break;
+            case 'adminFields':
+                require_once __DIR__ . '/admin/fields.php';
+                break;
+            case 'adminTestDatabase':
+                require_once __DIR__ . '/admin/test-database.php';
                 break;
             default:
                 http_response_code(404);

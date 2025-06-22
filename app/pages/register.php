@@ -18,7 +18,7 @@ include __DIR__ . '/../templates/header.php';
 ?>
 
 <main>
-    <div class="container mt-5" style="margin-top: 60px; max-width: 480px;">
+    <div class="container mt-7" style="margin-top: 60px; max-width: 480px;">
         <div class="auth-container">
             <div class="auth-box">
                 <h2>Register</h2>

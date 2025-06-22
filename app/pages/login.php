@@ -18,7 +18,7 @@ include __DIR__ . '/../templates/header.php';
 ?>
 
 <main>
-    <div class="container mt-5" style="margin-top: 60px; max-width: 480px;">
+    <div class="container mt-7" style="margin-top: 60px; max-width: 480px;">
         <div class="auth-container">
             <div class="auth-box">
                 <h2>Log In</h2>
@@ -52,4 +52,16 @@ include __DIR__ . '/../templates/header.php';
 <?php
 // Include the footer template
 include __DIR__ . '/../templates/footer.php';
-?> 
+?>
+
+<script>
+// After successful login and storing sessionStorage values, add:
+console.log('admin_token:', sessionStorage.getItem('admin_token'));
+console.log('admin_user:', sessionStorage.getItem('admin_user'));
+try {
+    const userObj = JSON.parse(sessionStorage.getItem('admin_user'));
+    console.log('Parsed admin_user:', userObj);
+} catch (e) {
+    console.error('Error parsing admin_user:', e);
+}
+</script> 

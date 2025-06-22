@@ -32,6 +32,7 @@ class AuthController
                 'user_id' => $user['user_id'],
                 'username' => $user['username'],
                 'email' => $user['email'],
+                'is_admin' => $user['is_admin'],
             ]);
 
             http_response_code(200);
@@ -43,6 +44,7 @@ class AuthController
                     "user_id" => $user['user_id'],
                     "username" => $user['username'],
                     "email" => $user['email'],
+                    "is_admin" => $user['is_admin'],
                 ]
             ]);
         } catch(Exception $e){

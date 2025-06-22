@@ -1,3 +1,7 @@
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+} 
+
 /* Create Event Section */
 #create-event-section {
     padding: 80px 0;
@@ -8,7 +12,7 @@
 #create-event-section h2 {
     font-size: 2.5rem;
     margin-bottom: 3rem;
-    color: var(--dark-color);
+    color: #fff;
 }
 
 #createEventForm {
@@ -59,4 +63,25 @@
 
 #createEventForm .btn-block {
     margin-top: 30px;
+}
+
+#edit-event-section, #edit-event-section h2, #editEventForm, #editEventForm label, #editEventForm input, #editEventForm textarea, #editEventForm select {
+    color: #fff;
+}
+
+#edit-event-section h2 {
+    color: #fff;
+}
+
+#editEventForm input,
+#editEventForm textarea,
+#editEventForm select {
+    background-color: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid #fff;
+}
+
+#editEventForm input::placeholder,
+#editEventForm textarea::placeholder {
+    color: #eee;
 } 

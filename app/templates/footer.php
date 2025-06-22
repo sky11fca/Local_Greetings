@@ -11,6 +11,9 @@
     <?php endif; ?>
     
     <script src="<?php echo TemplateHelper::asset('js/main.js'); ?>"></script>
+    <?php if (isset($currentPage) && $currentPage === 'admin'): ?>
+        <script src="/local_greeter/public/js/admin.js"></script>
+    <?php endif; ?>
     
     <?php if (isset($inlineScripts)): ?>
         <script><?php echo $inlineScripts; ?></script>

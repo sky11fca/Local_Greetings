@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const storeAuthData = (token, userData) =>{
         // Store JWT token in sessionStorage for authentication
         sessionStorage.setItem('jwt_token', token);
+        sessionStorage.setItem('user', JSON.stringify(userData));
     };
 
     // Helper to check if JWT is valid and not expired
@@ -122,14 +123,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if(result && result.success){
                 showMessage(loginMessage, "Login successful", "success");
 
-                storeAuthData(result.token, {
-                    id: result.data.user_id,
-                    username: result.data.username,
-                    email: result.data.email
-                });
+                // Store the full user object, including is_admin
+                storeAuthData(result.token, result.data);
                 
                 setTimeout(() => {
-                    window.location.href = '/local_greeter/home';
+                    const user = result.data;
+                    if (user.is_admin) {
+                        window.location.href = '/local_greeter/admin';
+                    } else {
+                        window.location.href = '/local_greeter/home';
+                    }
                 }, 1500)
             }
         })

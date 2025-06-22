@@ -1,15 +1,20 @@
+body {
+    background: linear-gradient(#667eea);
+    color: #fff;
+}
+
 /* Hero Section */
 #hero {
     position: relative;
-    height: 100vh;
-    min-height: 600px;
+    min-height: unset;
+    height: auto;
+    padding: 100px 0 60px 0;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     color: var(--white-color);
     overflow: hidden;
-    /* background-image: url('../images/landing-bg.jpg'); Removed as requested */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -22,8 +27,9 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Dark overlay for text readability */
+    background: rgba(0, 0, 0, 0.5);
     z-index: 1;
+    pointer-events: none;
 }
 
 #hero .container {
@@ -31,6 +37,14 @@
     z-index: 2;
     max-width: 800px;
     padding: 0 20px;
+}
+
+#hero h1,
+#hero p,
+#latest-events h2,
+#map-section h2 {
+    color: #fff;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.18);
 }
 
 #hero h1 {
@@ -126,6 +140,7 @@
     margin-bottom: 40px; /* Space before map section */
     border-radius: 0; /* No rounded corners for this section */
     max-width: none; /* No max width for this section */
+    background: rgba(255,255,255,0.10);
 }
 
 #latest-events h2 {
@@ -171,19 +186,22 @@
 .event-card h3 {
     font-size: 1.6rem;
     margin: 20px 0 8px;
-    color: var(--primary-color);
+    color: #fff;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.18);
 }
 
 .event-card p {
-    color: var(--secondary-color);
+    color: #f3eaff;
     margin-bottom: 20px;
     padding: 0 15px;
 }
 
 /* Map Section */
 #map-section {
-    padding: 80px 0; /* Consistent padding */
-    background-color: transparent; /* Allow body background to show */
+    padding: 80px 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
     text-align: center;
 }
 
@@ -199,4 +217,9 @@
 #map-section .btn {
     padding: 15px 30px; /* Standard button size */
     font-size: 1.2rem; /* Standard button font size */
+}
+
+section, .container, .spacer, .divider {
+    background: transparent !important;
+    box-shadow: none !important;
 } 

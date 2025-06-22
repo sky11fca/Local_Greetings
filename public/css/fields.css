@@ -1,3 +1,7 @@
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+} 
+
 .field-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -6,7 +10,7 @@
 }
 
 .field-card {
-    background-color: #fff;
+    background-color: #decbea;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     overflow: hidden;
