@@ -35,9 +35,6 @@ body.dark-mode header {
     background-color: var(--dark-dark-color);
 }
 
-body.dark-mode .container {
-    /* Adjust container styles if needed for dark mode */
-}
 
 body.dark-mode .btn {
     background-color: var(--dark-primary-color);

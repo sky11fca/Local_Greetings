@@ -6,15 +6,15 @@ $currentPage = "home";
 // Additional CSS files for this page
 $additionalCSS = [
     "/local_greeter/public/css/home.css",
-    "/local_greeter/public/css/map.css",
     "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 ];
 
 // Inline CSS for map
 $inlineCSS = "
     #map { 
-        height: 500px; 
-        width: 100%;
+        height: 400px; 
+        width: 80%;
+        margin: 20px auto;
         border-radius: 12px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
@@ -118,4 +118,4 @@ window.addEventListener('storage', (e) => {
 <?php
 // Include the footer template
 include __DIR__ . '/../templates/footer.php';
-?> 
+?>

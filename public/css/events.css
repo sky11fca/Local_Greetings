@@ -1,5 +1,6 @@
 body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(#764ba2 100%);
+    color: #111111;
 } 
 
 /* Events List Section */
@@ -12,7 +13,7 @@ body {
 #events-list h2 {
     font-size: 2.8rem;
     margin-bottom: 3.5rem;
-    color: #fff;
+    color: #f3ebeb;
 }
 
 /* Header Actions - replaces inline styles */

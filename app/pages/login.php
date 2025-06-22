@@ -53,15 +53,3 @@ include __DIR__ . '/../templates/header.php';
 // Include the footer template
 include __DIR__ . '/../templates/footer.php';
 ?>
-
-<script>
-// After successful login and storing sessionStorage values, add:
-console.log('admin_token:', sessionStorage.getItem('admin_token'));
-console.log('admin_user:', sessionStorage.getItem('admin_user'));
-try {
-    const userObj = JSON.parse(sessionStorage.getItem('admin_user'));
-    console.log('Parsed admin_user:', userObj);
-} catch (e) {
-    console.error('Error parsing admin_user:', e);
-}
-</script> 
