@@ -26,7 +26,7 @@ if (empty($files)) {
 <ul>
     <?php foreach ($files as $file): ?>
         <?php
-        $event_id = str_replace(['event_', '.rss'], '', $file);
+        $event_id = str_replace(['event_', '.xml'], '', $file);
         $file_url = "http://localhost/local_greeter/public/rss/$file";
         ?>
         <li>

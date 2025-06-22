@@ -2,18 +2,13 @@ SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE Users;
 TRUNCATE TABLE SportsFields;
 TRUNCATE TABLE Events;
-TRUNCATE TABLE RegistrationPolicies;
 TRUNCATE TABLE EventParticipants;
-TRUNCATE TABLE UserReputations;
-TRUNCATE TABLE Reviews;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- Reset auto-increment counters
 ALTER TABLE Users AUTO_INCREMENT = 1;
 ALTER TABLE SportsFields AUTO_INCREMENT = 1;
 ALTER TABLE Events AUTO_INCREMENT = 1;
-ALTER TABLE RegistrationPolicies AUTO_INCREMENT = 1;
-ALTER TABLE Reviews AUTO_INCREMENT = 1;
 
 -- Insert admin user
 INSERT INTO Users (username, email, password_hash, is_admin, reputation_score) VALUES
@@ -58,13 +53,6 @@ INSERT INTO Events (title, description, organizer_id, field_id, sport_type, star
 
                                                                                                                         ('Volei pe plajă', 'Volei recreativ pe nisip', 4, 5, 'volleyball', '2026-12-18 16:00:00', '2026-12-18 18:00:00', 12);
 
--- Insert registration policies
-INSERT INTO RegistrationPolicies (event_id, min_reputation, min_participations, is_manual_approval) VALUES
-                                                                                                        (1, NULL, NULL, FALSE),
-                                                                                                        (2, 5, 3, FALSE),
-                                                                                                        (3, NULL, NULL, TRUE),
-                                                                                                        (4, 3, NULL, FALSE);
-
 -- Insert event participants
 INSERT INTO EventParticipants (event_id, user_id, status) VALUES
                                                               (1, 3, 'confirmed'),
@@ -77,26 +65,6 @@ INSERT INTO EventParticipants (event_id, user_id, status) VALUES
                                                               (4, 2, 'confirmed'),
                                                               (4, 3, 'confirmed'),
                                                               (4, 5, 'confirmed');
-
--- Insert user reputations
-INSERT INTO UserReputations (user_id, sport_type, participation_count, organizer_count) VALUES
-                                                                                            (2, 'football', 12, 3),
-                                                                                            (2, 'basketball', 5, 1),
-                                                                                            (3, 'volleyball', 8, 2),
-                                                                                            (3, 'tennis', 3, 0),
-                                                                                            (4, 'football', 25, 10),
-                                                                                            (4, 'basketball', 7, 2),
-                                                                                            (5, 'tennis', 30, 15),
-                                                                                            (5, 'volleyball', 10, 3);
-
--- Insert reviews
-INSERT INTO Reviews (user_id, field_id, rating, comment) VALUES
-                                                             (2, 1, 4, 'Bun teren, dar iarba ar putea fi mai bine întreținută.'),
-                                                             (3, 1, 5, 'Excelent pentru meciuri amicale, iluminat bun seara.'),
-                                                             (4, 2, 3, 'Coșurile sunt puțin deteriorate, dar în rest ok.'),
-                                                             (5, 3, 5, 'Cele mai bune terenuri de tenis din Iași!'),
-                                                             (2, 4, 4, 'Sala modernă, doar că uneori e aglomerat.'),
-                                                             (4, 5, 4, 'Nisip de calitate, distracție garantată.');
 
 -- Update event participant counts
 UPDATE Events e

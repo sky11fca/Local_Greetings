@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../models/EventModel.php';
 require_once __DIR__ . '/../config/JWT.php';
+require_once __DIR__ . '/../controllers/RSSFeedController.php';
 
 class EventController
 {
@@ -200,6 +201,7 @@ class EventController
             if (!$result['success']) {
                 throw new Exception($result['message'] ?: 'Error joining event.', 500);
             }
+
 
             echo json_encode([
                 "success" => true,

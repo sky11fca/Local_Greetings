@@ -316,6 +316,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
             if (response.ok && data.success) {
                 alert('You have joined the event!');
+
+                const responseRss = await fetch(window.location.origin + basePath + '/api/index.php?action=sendRssFeed', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ event_id: eventId })
+                })
+
+                const dataRss = await responseRss.json();
+
+                if(responseRss.ok && data.success){
+                    alert('RSS Feed has been sent!');
+                }
+                else{
+                    alert('RSS Feed has not been sent!');
+                }
+
                 applyFilters();
             } else {
                 alert(data.message || 'Failed to join event.');
