@@ -27,31 +27,30 @@ class RSSFeedController{
                 throw new Exception('Error saving RSS file');
             }
 
-            $recipients = $this->rssModel->getRecipients();
-            if(empty($recipients)){
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'No recipients found',
-                    'email_sent' => false
-                ]);
-            }
+//            $recipients = $this->rssModel->getRecipients();
+//            if(empty($recipients)){
+//                echo json_encode([
+//                    'success' => true,
+//                    'message' => 'No recipients found',
+//                    'email_sent' => false
+//                ]);
+//            }
 
-            $subject = 'New Sport Event:  ' . $event['title'];
-
-            $htmlContent = $this->emailService->generateEmailContent($event);
-            $emailSent = $this->emailService->sendEmail(
-                $recipients,
-                $subject,
-                $htmlContent,
-                $rssContent,
-                $eventId
-            );
+//            $subject = 'New Sport Event:  ' . $event['title'];
+//
+//            $htmlContent = $this->emailService->generateEmailContent($event);
+//            $emailSent = $this->emailService->sendEmail(
+//                $recipients,
+//                $subject,
+//                $htmlContent,
+//                $rssContent,
+//                $eventId
+//            );
 
 
             echo json_encode([
                 'success' => true,
                 'message' => 'RSS feed generated successfully',
-                'email_sent' => $emailSent
             ]);
         } catch(Exception $e){
             http_response_code($e->getCode() ?: 400);

@@ -155,9 +155,13 @@ class EventModel
                 $stmt = $this->db->prepare("UPDATE Events SET current_participants = current_participants + 1 WHERE event_id = ?");
                 $stmt->execute([$eventId]);
 
+                $event = $this->getEventById($eventId);
+                $isFull = ($event['max_participants'] !== null &&
+                    $event['current_participants'] >= $event['max_participants']);
+
                 $this->db->commit();
 
-                return ["success" => true, "message" => "Successfully joined event."];
+                return ["success" => true, "message" => "Successfully joined event.", 'event_id' => $eventId, 'is_full' => $isFull];
             } catch (PDOException $e) {
                 $this->db->rollBack();
                 return ["success" => false, "message" => "Error joining event: " . $e->getMessage()];
@@ -460,4 +464,10 @@ class EventModel
         $stmt->execute();
         return $stmt->fetchColumn();
     }
+
+    public function getDb()
+    {
+        return $this->db;
+    }
+
 }
