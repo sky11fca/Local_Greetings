@@ -1,7 +1,4 @@
-DROP TABLE Reviews;
-DROP TABLE UserReputations;
 DROP TABLE EventParticipants;
-DROP TABLE RegistrationPolicies;
 DROP TABLE Events;
 DROP TABLE SportsFields;
 DROP TABLE Users;
@@ -12,7 +9,6 @@ CREATE TABLE Users (
                        email VARCHAR(100) NOT NULL UNIQUE,
                        password_hash VARCHAR(255) NOT NULL,
                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                       last_login TIMESTAMP NULL,
                        reputation_score INT DEFAULT 0,
                        is_admin BOOLEAN DEFAULT FALSE,
                        CONSTRAINT chk_email CHECK (email LIKE '%@%.%')
@@ -51,16 +47,6 @@ CREATE TABLE Events (
                         CONSTRAINT chk_event_times CHECK (start_time < end_time)
 ) ENGINE=InnoDB;
 
--- Registration policies
-CREATE TABLE RegistrationPolicies (
-                                      policy_id INT AUTO_INCREMENT PRIMARY KEY,
-                                      event_id INT NOT NULL UNIQUE,
-                                      min_reputation INT DEFAULT NULL,
-                                      min_participations INT DEFAULT NULL,
-                                      is_manual_approval BOOLEAN DEFAULT FALSE,
-                                      age_restriction JSON DEFAULT NULL,
-                                      FOREIGN KEY (event_id) REFERENCES Events(event_id) ON DELETE CASCADE
-) ENGINE=InnoDB;
 
 -- Event participants
 CREATE TABLE EventParticipants (
@@ -73,32 +59,18 @@ CREATE TABLE EventParticipants (
                                    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- User reputations by sport
-CREATE TABLE UserReputations (
-                                 user_id INT,
-                                 sport_type ENUM('football', 'basketball', 'tennis', 'volleyball') NOT NULL,
-                                 participation_count INT DEFAULT 0,
-                                 organizer_count INT DEFAULT 0,
-                                 last_participation TIMESTAMP NULL,
-                                 PRIMARY KEY (user_id, sport_type),
-                                 FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS AdminLogs (
+                                         log_id INT AUTO_INCREMENT PRIMARY KEY,
+                                         action VARCHAR(100) NOT NULL,
+                                         details TEXT,
+                                         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                         INDEX idx_timestamp (timestamp),
+                                         INDEX idx_action (action)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8mb3_unicode_ci;
 
--- Reviews for sports fields
-CREATE TABLE Reviews (
-                         review_id INT AUTO_INCREMENT PRIMARY KEY,
-                         user_id INT NOT NULL,
-                         field_id INT NOT NULL,
-                         rating TINYINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
-                         comment TEXT,
-                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                         FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-                         FOREIGN KEY (field_id) REFERENCES SportsFields(field_id) ON DELETE CASCADE,
-                         CONSTRAINT chk_rating CHECK (rating BETWEEN 1 AND 5)
-) ENGINE=InnoDB;
 
 -- Indexes for performance
-CREATE INDEX idx_user_reputation ON UserReputations(sport_type, participation_count);
+
 CREATE INDEX idx_event_sport ON Events(sport_type, start_time);
 CREATE INDEX idx_event_status ON Events(status, start_time);
 CREATE INDEX idx_events_organizer ON Events(organizer_id);
