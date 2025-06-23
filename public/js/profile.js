@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Helper to decode user info from JWT
     function getUserFromJWT() {
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         if (!token) return null;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
@@ -17,24 +17,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Helper to check if JWT is valid and not expired
     function isJWTValid() {
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         if (!token) return false;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             // Check for expiration
             if (!payload.exp || Date.now() >= payload.exp * 1000) {
-                sessionStorage.removeItem('jwt_token');
+                localStorage.removeItem('jwt_token');
                 return false;
             }
             return true;
         } catch (e) {
-            sessionStorage.removeItem('jwt_token');
+            localStorage.removeItem('jwt_token');
             return false;
         }
     }
 
     function updateAccountView() {
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         const userData = getUserFromJWT();
         if (token && userData && isJWTValid()) {
             loggedInContent.classList.remove('hidden');
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
-            sessionStorage.removeItem('jwt_token');
+            localStorage.removeItem('jwt_token');
             // Redirect to login page after logout
             window.location.href = '/local_greeter/login';
         });

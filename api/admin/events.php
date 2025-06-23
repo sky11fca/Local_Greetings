@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once __DIR__ . '/AdminController.php';
 require_once __DIR__ . '/../models/EventModel.php';
 
@@ -16,7 +15,7 @@ class AdminEventsController extends AdminController {
         
         $method = $_SERVER['REQUEST_METHOD'];
         
-        error_log('API endpoint: ' . $endpoint . ' | Method: ' . $_SERVER['REQUEST_METHOD']);
+        // error_log('API endpoint: ' . $endpoint . ' | Method: ' . $_SERVER['REQUEST_METHOD']); // Removed undefined $endpoint
         
         switch ($method) {
             case 'GET':
@@ -73,7 +72,7 @@ class AdminEventsController extends AdminController {
                     e.created_at
                     FROM Events e 
                     JOIN Users u on e.organizer_id = u.user_id
-                    JOIN SportsFields sf ON e.field_id = sf.field_id
+                    LEFT JOIN SportsFields sf ON e.field_id = sf.field_id
                     WHERE 1=1";
                 
                 $params = [];
@@ -89,10 +88,7 @@ class AdminEventsController extends AdminController {
                     $params[] = $status;
                 }
                 
-                $query .= " ORDER BY e.created_at DESC LIMIT ? OFFSET ?";
-                $params[] = $itemsPerPage;
-                $params[] = $offset;
-                
+                $query .= " ORDER BY e.created_at DESC LIMIT $itemsPerPage OFFSET $offset";
                 $stmt = $this->db->prepare($query);
                 $stmt->execute($params);
                 $events = $stmt->fetchAll(PDO::FETCH_ASSOC);

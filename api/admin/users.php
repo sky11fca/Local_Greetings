@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once __DIR__ . '/AdminController.php';
 require_once __DIR__ . '/../models/UserModel.php';
 
@@ -62,10 +61,7 @@ class AdminUsersController extends AdminController {
                     $params[] = '%' . $search . '%';
                 }
                 
-                $query .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-                $params[] = $itemsPerPage;
-                $params[] = $offset;
-                
+                $query .= " ORDER BY created_at DESC LIMIT $itemsPerPage OFFSET $offset";
                 $stmt = $this->db->prepare($query);
                 $stmt->execute($params);
                 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);

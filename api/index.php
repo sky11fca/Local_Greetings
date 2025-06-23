@@ -127,11 +127,29 @@ try {
             case 'adminEvents':
                 require_once __DIR__ . '/admin/events.php';
                 break;
-            case 'adminFields':
-                require_once __DIR__ . '/admin/fields.php';
-                break;
             case 'adminTestDatabase':
                 require_once __DIR__ . '/admin/test-database.php';
+                break;
+            case 'setSession':
+                // Set PHP session from JWT
+                session_start();
+                $headers = getallheaders();
+                $authHeader = $headers['Authorization'] ?? '';
+                if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+                    $jwt = $matches[1];
+                    require_once __DIR__ . '/config/JWT.php';
+                    $payload = JWT::validate($jwt);
+                    if ($payload && isset($payload['user_id'])) {
+                        $_SESSION['user_id'] = $payload['user_id'];
+                        $_SESSION['username'] = $payload['username'] ?? '';
+                        $_SESSION['email'] = $payload['email'] ?? '';
+                        $_SESSION['is_admin'] = $payload['is_admin'] ?? 0;
+                        echo json_encode(['success' => true, 'message' => 'Session set', 'is_admin' => $_SESSION['is_admin']]);
+                        break;
+                    }
+                }
+                http_response_code(401);
+                echo json_encode(['success' => false, 'message' => 'Invalid or missing JWT']);
                 break;
             default:
                 http_response_code(404);
@@ -179,9 +197,6 @@ try {
                 break;
             case 'adminEvents':
                 require_once __DIR__ . '/admin/events.php';
-                break;
-            case 'adminFields':
-                require_once __DIR__ . '/admin/fields.php';
                 break;
             case 'adminTestDatabase':
                 require_once __DIR__ . '/admin/test-database.php';

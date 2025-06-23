@@ -13,7 +13,7 @@ class AdminDashboard {
 
     // JWT Authentication helpers
     getAuthHeaders() {
-        const adminToken = sessionStorage.getItem('jwt_token');
+        const adminToken = localStorage.getItem('jwt_token');
         return {
             'Content-Type': 'application/json',
             'Authorization': adminToken ? `Bearer ${adminToken}` : ''
@@ -21,7 +21,7 @@ class AdminDashboard {
     }
 
     checkAuth() {
-        const adminToken = sessionStorage.getItem('jwt_token');
+        const adminToken = localStorage.getItem('jwt_token');
         if (!adminToken) {
             window.location.href = '/local_greeter/app/pages/login.php';
             return false;
@@ -44,8 +44,8 @@ class AdminDashboard {
             
             // If unauthorized, redirect to login
             if (response.status === 401) {
-                sessionStorage.removeItem('jwt_token');
-                sessionStorage.removeItem('user');
+                localStorage.removeItem('jwt_token');
+                localStorage.removeItem('user');
                 window.location.href = '/local_greeter/app/pages/login.php';
                 return null;
             }
@@ -256,25 +256,29 @@ class AdminDashboard {
 
     async loadUsers(page = 1) {
         const search = document.getElementById('user-search')?.value || '';
-        
+        const tbody = document.getElementById('users-tbody');
         try {
             const response = await this.makeAuthenticatedRequest(`/local_greeter/api/index.php?action=adminUsers&page=${page}&search=${encodeURIComponent(search)}`);
-            if (!response) return;
-            
+            if (!response) {
+                tbody.innerHTML = '<tr><td colspan="7">Failed to load users. Please try again later.</td></tr>';
+                return;
+            }
             const data = await response.json();
-            
             if (data.success && data.data) {
                 this.renderUsersTable(data.data.users);
                 this.renderPagination('users-pagination', data.data.pagination, (page) => this.loadUsers(page));
+            } else {
+                tbody.innerHTML = `<tr><td colspan="7">${data.message || 'Failed to load users.'}</td></tr>`;
             }
         } catch (error) {
             console.error('Error loading users:', error);
+            tbody.innerHTML = '<tr><td colspan="7">Failed to load users. Please try again later.</td></tr>';
         }
     }
 
     renderUsersTable(users) {
         const tbody = document.getElementById('users-tbody');
-        if (users.length === 0) {
+        if (!Array.isArray(users) || users.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7">No users found</td></tr>';
             return;
         }
@@ -300,25 +304,29 @@ class AdminDashboard {
     async loadEvents(page = 1) {
         const search = document.getElementById('event-search')?.value || '';
         const status = document.getElementById('event-status-filter')?.value || '';
-        
+        const tbody = document.getElementById('events-tbody');
         try {
             const response = await this.makeAuthenticatedRequest(`/local_greeter/api/index.php?action=adminEvents&page=${page}&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`);
-            if (!response) return;
-            
+            if (!response) {
+                tbody.innerHTML = '<tr><td colspan="9">Failed to load events. Please try again later.</td></tr>';
+                return;
+            }
             const data = await response.json();
-            
             if (data.success) {
-                this.renderEventsTable(data.events);
-                this.renderPagination('events-pagination', data.pagination, (page) => this.loadEvents(page));
+                this.renderEventsTable(data.data.events);
+                this.renderPagination('events-pagination', data.data.pagination, (page) => this.loadEvents(page));
+            } else {
+                tbody.innerHTML = `<tr><td colspan="9">${data.message || 'Failed to load events.'}</td></tr>`;
             }
         } catch (error) {
             console.error('Error loading events:', error);
+            tbody.innerHTML = '<tr><td colspan="9">Failed to load events. Please try again later.</td></tr>';
         }
     }
 
     renderEventsTable(events) {
         const tbody = document.getElementById('events-tbody');
-        if (events.length === 0) {
+        if (!Array.isArray(events) || events.length === 0) {
             tbody.innerHTML = '<tr><td colspan="9">No events found</td></tr>';
             return;
         }
@@ -337,49 +345,6 @@ class AdminDashboard {
                     <div class="action-buttons">
                         <button class="btn btn-sm btn-primary" onclick="adminDashboard.editEvent(${event.event_id})">Edit</button>
                         <button class="btn btn-sm btn-danger" onclick="adminDashboard.deleteEvent(${event.event_id})">Delete</button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    async loadFields(page = 1) {
-        const search = document.getElementById('field-search')?.value || '';
-        const type = document.getElementById('field-type-filter')?.value || '';
-        
-        try {
-            const response = await this.makeAuthenticatedRequest(`/local_greeter/api/index.php?action=adminFields&page=${page}&search=${encodeURIComponent(search)}&type=${encodeURIComponent(type)}`);
-            if (!response) return;
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                this.renderFieldsTable(data.fields);
-                this.renderPagination('fields-pagination', data.pagination, (page) => this.loadFields(page));
-            }
-        } catch (error) {
-            console.error('Error loading fields:', error);
-        }
-    }
-
-    renderFieldsTable(fields) {
-        const tbody = document.getElementById('fields-tbody');
-        if (fields.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6">No fields found</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = fields.map(field => `
-            <tr>
-                <td>${field.field_id}</td>
-                <td>${this.escapeHtml(field.name)}</td>
-                <td>${this.escapeHtml(field.address)}</td>
-                <td>${this.escapeHtml(field.type)}</td>
-                <td><span class="status-${field.is_public ? 'active' : 'inactive'}">${field.is_public ? 'Yes' : 'No'}</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="btn btn-sm btn-primary" onclick="adminDashboard.editField(${field.field_id})">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="adminDashboard.deleteField(${field.field_id})">Delete</button>
                     </div>
                 </td>
             </tr>
@@ -625,79 +590,6 @@ class AdminDashboard {
         } catch (error) {
             console.error('Error deleting event:', error);
             this.showNotification('Error deleting event', 'error');
-        }
-    }
-
-    addField() {
-        document.getElementById('field-modal-title').textContent = 'Add Sports Field';
-        document.getElementById('field-form').reset();
-        document.getElementById('field-modal').style.display = 'block';
-    }
-
-    async editField(fieldId) {
-        try {
-            const response = await fetch(`/local_greeter/api/index.php?action=adminFields&id=${fieldId}`);
-            const data = await response.json();
-            
-            if (data.success) {
-                const field = data.field;
-                document.getElementById('field-modal-title').textContent = 'Edit Sports Field';
-                document.getElementById('field-name').value = field.name;
-                document.getElementById('field-address').value = field.address;
-                document.getElementById('field-type').value = field.type;
-                document.getElementById('field-amenities').value = field.amenities || '';
-                document.getElementById('field-hours').value = field.opening_hours || '';
-                document.getElementById('field-public').checked = field.is_public == 1;
-                document.getElementById('field-form').dataset.fieldId = fieldId;
-                document.getElementById('field-modal').style.display = 'block';
-            }
-        } catch (error) {
-            console.error('Error loading field:', error);
-        }
-    }
-
-    async saveField() {
-        const formData = new FormData(document.getElementById('field-form'));
-        const fieldId = document.getElementById('field-form').dataset.fieldId;
-        
-        try {
-            const response = await fetch('/local_greeter/api/index.php?action=adminFields', {
-                method: fieldId ? 'PUT' : 'POST',
-                body: formData
-            });
-            
-            const data = await response.json();
-            if (data.success) {
-                this.closeAllModals();
-                this.loadFields();
-                this.showNotification('Field saved successfully', 'success');
-            } else {
-                this.showNotification(data.message || 'Error saving field', 'error');
-            }
-        } catch (error) {
-            console.error('Error saving field:', error);
-            this.showNotification('Error saving field', 'error');
-        }
-    }
-
-    async deleteField(fieldId) {
-        if (!confirm('Are you sure you want to delete this field?')) return;
-        
-        try {
-            const response = await fetch(`/local_greeter/api/index.php?action=adminFields&id=${fieldId}`, {
-                method: 'DELETE'
-            });
-            
-            const data = await response.json();
-            if (data.success) {
-                this.loadFields();
-                this.showNotification('Field deleted successfully', 'success');
-            } else {
-                this.showNotification(data.message || 'Error deleting field', 'error');
-            }
-        } catch (error) {
-            console.error('Error deleting field:', error);
-            this.showNotification('Error deleting field', 'error');
         }
     }
 

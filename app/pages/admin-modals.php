@@ -81,52 +81,6 @@
     </div>
 </div>
 
-<!-- Field Modal -->
-<div id="field-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2 id="field-modal-title">Add Sports Field</h2>
-        <form id="field-form">
-            <div class="form-group">
-                <label for="field-name">Name:</label>
-                <input type="text" id="field-name" name="name" required>
-            </div>
-            <div class="form-group">
-                <label for="field-address">Address:</label>
-                <input type="text" id="field-address" name="address" required>
-            </div>
-            <div class="form-group">
-                <label for="field-type">Type:</label>
-                <select id="field-type" name="type" required>
-                    <option value="football">Football</option>
-                    <option value="basketball">Basketball</option>
-                    <option value="tennis">Tennis</option>
-                    <option value="volleyball">Volleyball</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="field-amenities">Amenities:</label>
-                <textarea id="field-amenities" name="amenities"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="field-hours">Opening Hours:</label>
-                <input type="text" id="field-hours" name="opening_hours" placeholder="e.g., 9:00 AM - 10:00 PM">
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="field-public" name="is_public" value="1">
-                    Public Field
-                </label>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Save</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal('field-modal')">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <!-- Confirmation Modal -->
 <div id="confirm-modal" class="modal">
     <div class="modal-content">

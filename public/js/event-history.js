@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const limit = 8;
 
     async function fetchHistory(page = 1) {
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         if (!token) {
             eventGrid.innerHTML = '<p>You must be logged in to view your event history. Please <a href="/local_greeter/login">log in</a>.</p>';
             return;

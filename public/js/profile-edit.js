@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileEditForm = document.getElementById('profileEditForm');
 
     function populateForm() {
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         if (!token) {
             window.location.href = '/local_greeter/login';
             return;
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         profileEditForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const token = sessionStorage.getItem('jwt_token');
+            const token = localStorage.getItem('jwt_token');
             if (!token) {
                 alert('Your session has expired. Please log in again.');
                 window.location.href = '/local_greeter/login';
@@ -82,13 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(result.message || 'Failed to update profile');
                 }
 
-                // Update sessionStorage with new token and user data
+                // Update localStorage with new token and user data
                 if (result.token) {
-                    sessionStorage.setItem('jwt_token', result.token);
+                    localStorage.setItem('jwt_token', result.token);
                 }
                 
                 if (result.data) {
-                    sessionStorage.setItem('user', JSON.stringify(result.data));
+                    localStorage.setItem('user', JSON.stringify(result.data));
                 }
 
                 alert('Profile updated successfully!');

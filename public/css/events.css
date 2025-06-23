@@ -243,3 +243,22 @@ body {
     }
 }
 
+#event-history, .event-history {
+  color: #fff;
+}
+
+#event-history-grid .event-card, #event-history-grid .event-card * {
+  color: #fff !important;
+}
+
+#event-history-section h2, #event-history-section > .container > p {
+  color: #fff !important;
+}
+
+#event-history-section h2 {
+  margin-bottom: 0.5em;
+}
+#event-history-section > .container > p {
+  margin-bottom: 2em;
+}
+

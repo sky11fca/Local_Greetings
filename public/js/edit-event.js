@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Handle form submission
     editEventForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
 
         if (!token) {
             alert('You must be logged in to update an event.');
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         if (!token) {
             alert('You must be logged in to delete an event.');
             return;

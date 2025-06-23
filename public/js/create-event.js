@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         createEventForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const token = sessionStorage.getItem('jwt_token');
+            const token = localStorage.getItem('jwt_token');
             if (!token) {
                 alert('You must be logged in to create an event.');
                 window.location.href = '/local_greeter/login';

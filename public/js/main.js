@@ -2,8 +2,8 @@ console.log('main.js loaded and executing.');
 
 // Global logout function
 function logout() {
-    // Clear session storage
-    sessionStorage.removeItem('jwt_token');
+    // Clear local storage
+    localStorage.removeItem('jwt_token');
     
     // Redirect to home page
     window.location.href = '/local_greeter/';
@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateProfileDisplay() {
         console.log('updateProfileDisplay called.');
-        // Check for JWT token in sessionStorage instead of localStorage
-        const token = sessionStorage.getItem('jwt_token');
+        // Check for JWT token in localStorage instead of sessionStorage
+        const token = localStorage.getItem('jwt_token');
         const isLoggedIn = token !== null && token !== '';
         console.log('JWT token exists:', isLoggedIn);
 
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Listen for storage changes from other tabs/windows only
     // This prevents the event from firing when the same page updates storage
-    let lastToken = sessionStorage.getItem('jwt_token');
+    let lastToken = localStorage.getItem('jwt_token');
     window.addEventListener('storage', (e) => {
         // Only update if the JWT token changed and it's from a different tab/window
         if (e.key === 'jwt_token' && e.newValue !== lastToken) {

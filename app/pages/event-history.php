@@ -1,4 +1,9 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /local_greeter/login');
+    exit();
+}
 // Set page-specific variables
 $pageTitle = "My Event History - Iași Sports Network";
 $currentPage = "event-history";
@@ -21,12 +26,10 @@ include __DIR__ . '/../templates/header.php';
     <section id="event-history-section">
         <div class="container">
             <h2>My Event History</h2>
-            <p>Here are the past events you have participated in.</p>
+            <p>Here are the past events you have participated in:</p>
             <div id="event-history-grid" class="event-grid">
-                <!-- Past event cards will be loaded here by JavaScript -->
             </div>
             <div id="history-pagination" class="pagination">
-                <!-- Pagination controls will go here -->
             </div>
         </div>
     </section>

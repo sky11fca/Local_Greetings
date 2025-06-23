@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Helper to decode user info from JWT
     function getUserFromJWT() {
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         if (!token) return null;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
@@ -64,25 +64,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const storeAuthData = (token, userData) =>{
-        // Store JWT token in sessionStorage for authentication
-        sessionStorage.setItem('jwt_token', token);
-        sessionStorage.setItem('user', JSON.stringify(userData));
+        // Store JWT token in localStorage for authentication
+        localStorage.setItem('jwt_token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
     };
 
     // Helper to check if JWT is valid and not expired
     function isJWTValid() {
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         if (!token) return false;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             // Check for expiration
             if (!payload.exp || Date.now() >= payload.exp * 1000) {
-                sessionStorage.removeItem('jwt_token');
+                localStorage.removeItem('jwt_token');
                 return false;
             }
             return true;
         } catch (e) {
-            sessionStorage.removeItem('jwt_token');
+            localStorage.removeItem('jwt_token');
             return false;
         }
     }
@@ -125,15 +125,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Store the full user object, including is_admin
                 storeAuthData(result.token, result.data);
-                
-                setTimeout(() => {
-                    const user = result.data;
-                    if (user.is_admin) {
-                        window.location.href = '/local_greeter/admin';
-                    } else {
-                        window.location.href = '/local_greeter/home';
-                    }
-                }, 1500)
+
+                // Sync PHP session with JWT
+                fetch('/local_greeter/api/index.php?action=setSession', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${result.token}`
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    setTimeout(() => {
+                        const user = result.data;
+                        if (user.is_admin) {
+                            window.location.href = '/local_greeter/admin';
+                        } else {
+                            window.location.href = '/local_greeter/home';
+                        }
+                    }, 500);
+                })
+                .catch(() => {
+                    showMessage(loginMessage, "Session sync failed. Please try again.");
+                });
             }
         })
     }

@@ -1,4 +1,9 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /local_greeter/login');
+    exit();
+}
 // Set page-specific variables
 $pageTitle = "Create Event - Iași Sports Network";
 $currentPage = "create-event";

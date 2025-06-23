@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Check authentication status using only JWT token
     const checkAuth = () => {
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         const userData = getUserFromJWT();
         return { 
             token, 
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Helper to decode user info from JWT
     function getUserFromJWT() {
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         if (!token) return null;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
@@ -36,18 +36,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Helper to check if JWT is valid and not expired
     function isJWTValid() {
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         if (!token) return false;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             // Check for expiration
             if (!payload.exp || Date.now() >= payload.exp * 1000) {
-                sessionStorage.removeItem('jwt_token');
+                localStorage.removeItem('jwt_token');
                 return false;
             }
             return true;
         } catch (e) {
-            sessionStorage.removeItem('jwt_token');
+            localStorage.removeItem('jwt_token');
             return false;
         }
     }
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            const token = sessionStorage.getItem('jwt_token');
+            const token = localStorage.getItem('jwt_token');
             const headers = {
                 'Content-Type': 'application/json'
             };
@@ -104,9 +104,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-                options.body = JSON.stringify({
-                    user_id: userData.user_id,
-                });
+                // Do NOT send user_id in the body for joined/created events
+                // The backend uses the JWT for user identification
+                // options.body = JSON.stringify({ user_id: userData.user_id });
             }
 
             // Debug log request
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.ok) {
                 if (response.status === 401) {
                     // Token expired or invalid
-                    sessionStorage.removeItem('jwt_token');
+                    localStorage.removeItem('jwt_token');
                     if (currentTab === 'joined' || currentTab === 'created') {
                         eventGrid.innerHTML = '<p>Your session has expired. Please <a href="/local_greeter/login">log in</a> again.</p>';
                         paginationDiv.innerHTML = '';
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     async function joinEvent(eventId) {
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         if (!token) {
             alert('You must be logged in to join an event.');
             window.location.href = '/local_greeter/login';
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function leaveEvent(eventId) {
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
         if (!token) {
             alert('You must be logged in to leave an event.');
             window.location.href = '/local_greeter/login';

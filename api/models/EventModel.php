@@ -26,7 +26,7 @@ class EventModel
         e.created_at
         FROM Events e 
         JOIN Users u on e.organizer_id = u.user_id
-        JOIN SportsFields sf ON e.field_id = sf.field_id
+        LEFT JOIN SportsFields sf ON e.field_id = sf.field_id
         WHERE 1=1";
 
             $params = [];
@@ -67,7 +67,7 @@ class EventModel
         e.created_at
     FROM Events e 
     JOIN Users u on e.organizer_id = u.user_id
-    JOIN SportsFields sf ON e.field_id = sf.field_id
+    LEFT JOIN SportsFields sf ON e.field_id = sf.field_id
     WHERE e.event_id IN ( SELECT event_id FROM EventParticipants WHERE user_id = :user_id AND status = 'confirmed') AND e.organizer_id != :user_id";
 
         $params = ['user_id' => $userId];
@@ -107,7 +107,7 @@ class EventModel
         e.created_at
     FROM Events e 
     JOIN Users u on e.organizer_id = u.user_id
-    JOIN SportsFields sf ON e.field_id = sf.field_id
+    LEFT JOIN SportsFields sf ON e.field_id = sf.field_id
     WHERE e.organizer_id = :user_id";
 
         $params = ['user_id' => $userId];
@@ -261,7 +261,7 @@ class EventModel
             e.sport_type
         FROM Events e
         JOIN Users u ON e.organizer_id = u.user_id
-        JOIN SportsFields sf ON e.field_id = sf.field_id
+        LEFT JOIN SportsFields sf ON e.field_id = sf.field_id
         WHERE e.end_time > NOW()";
 
         $params = [];

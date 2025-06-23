@@ -52,7 +52,7 @@ $currentPage = $currentPage ?? "home";
     <script>
         // Helper to decode user info from JWT
         function getUserFromJWT() {
-            const token = sessionStorage.getItem('jwt_token');
+            const token = localStorage.getItem('jwt_token');
             if (!token) return null;
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
@@ -64,25 +64,25 @@ $currentPage = $currentPage ?? "home";
 
         // Helper to check if JWT is valid and not expired
         function isJWTValid() {
-            const token = sessionStorage.getItem('jwt_token');
+            const token = localStorage.getItem('jwt_token');
             if (!token) return false;
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 // Check for expiration
                 if (!payload.exp || Date.now() >= payload.exp * 1000) {
-                    sessionStorage.removeItem('jwt_token');
+                    localStorage.removeItem('jwt_token');
                     return false;
                 }
                 return true;
             } catch (e) {
-                sessionStorage.removeItem('jwt_token');
+                localStorage.removeItem('jwt_token');
                 return false;
             }
         }
 
         // Check authentication status and update UI
         function updateAuthUI() {
-            const token = sessionStorage.getItem('jwt_token');
+            const token = localStorage.getItem('jwt_token');
             const userData = getUserFromJWT();
             const loginBtn = document.getElementById('login-btn');
             const userNav = document.getElementById('user-nav');
