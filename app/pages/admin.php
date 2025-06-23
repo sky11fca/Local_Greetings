@@ -60,14 +60,6 @@ include __DIR__ . "/../templates/header.php";
                         <p>Checking system status...</p>
                     </div>
                 </div>
-                <div class="dashboard-card">
-                    <h3>Quick Actions</h3>
-                    <div class="quick-actions">
-                        <button class="btn btn-primary" id="create-backup-btn">Create Backup</button>
-                        <button class="btn btn-secondary" id="send-system-email-btn">Send System Email</button>
-                        <button class="btn btn-warning" id="clear-cache-btn">Clear Cache</button>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -104,15 +96,6 @@ include __DIR__ . "/../templates/header.php";
         <div class="admin-content" id="events-tab">
             <div class="content-header">
                 <h2>Event Management</h2>
-                <div class="header-actions">
-                    <input type="text" id="event-search" placeholder="Search events..." class="search-input">
-                    <select id="event-status-filter" class="filter-select">
-                        <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
-                </div>
             </div>
             <div class="table-container">
                 <table class="admin-table" id="events-table">
@@ -120,13 +103,13 @@ include __DIR__ . "/../templates/header.php";
                         <tr>
                             <th>ID</th>
                             <th>Title</th>
-                            <th>Organizer</th>
                             <th>Field</th>
                             <th>Sport Type</th>
-                            <th>Date/Time</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
                             <th>Participants</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="events-tbody">

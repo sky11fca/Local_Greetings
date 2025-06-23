@@ -76,14 +76,6 @@ class AdminDashboard {
             });
         });
 
-        // Quick Actions
-        document.getElementById('create-backup-btn')?.addEventListener('click', () => this.createBackup());
-        document.getElementById('send-system-email-btn')?.addEventListener('click', () => this.sendSystemEmail());
-        document.getElementById('clear-cache-btn')?.addEventListener('click', () => this.clearCache());
-        document.getElementById('add-user-btn')?.addEventListener('click', () => this.addUser());
-        document.getElementById('add-event-btn')?.addEventListener('click', () => this.addEvent());
-        document.getElementById('add-field-btn')?.addEventListener('click', () => this.addField());
-
         // Search functionality
         document.getElementById('user-search')?.addEventListener('input', this.debounce(() => {
             this.loadUsers();
@@ -291,12 +283,7 @@ class AdminDashboard {
                 <td><span class="badge ${user.is_admin ? 'badge-admin' : 'badge-user'}">${user.is_admin ? 'Admin' : 'User'}</span></td>
                 <td><span class="status-active">Active</span></td>
                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="btn btn-sm btn-primary" onclick="adminDashboard.editUser(${user.user_id})">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="adminDashboard.deleteUser(${user.user_id})">Delete</button>
-                    </div>
-                </td>
+                <td></td>
             </tr>
         `).join('');
     }
@@ -341,12 +328,7 @@ class AdminDashboard {
                 <td>${new Date(event.start_time).toLocaleString()}</td>
                 <td>${event.current_participants}/${event.max_participants}</td>
                 <td><span class="status-${event.status}">${event.status}</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="btn btn-sm btn-primary" onclick="adminDashboard.editEvent(${event.event_id})">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="adminDashboard.deleteEvent(${event.event_id})">Delete</button>
-                    </div>
-                </td>
+                <td></td>
             </tr>
         `).join('');
     }
