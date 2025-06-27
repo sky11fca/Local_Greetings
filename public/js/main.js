@@ -26,13 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Removed Profile Dropdown functionality
 
-    // Profile Button/Picture Toggle functionality
+    // Profile Button Toggle functionality
     const profileButton = document.getElementById('profile-button');
     const profilePictureLink = document.getElementById('profile-picture-link');
 
     function updateProfileDisplay() {
         console.log('updateProfileDisplay called.');
-        // Check for JWT token in localStorage instead of sessionStorage
+        // Check for JWT token in localStorage
         const token = localStorage.getItem('jwt_token');
         const isLoggedIn = token !== null && token !== '';
         console.log('JWT token exists:', isLoggedIn);
