@@ -22,10 +22,8 @@ class RSSFeedController{
             }
 
             $rssContent = $this->rssModel->generateRSSFeed($event);
+            $rssHtml = $this->rssModel->rssToHtml($rssContent);
 
-            if(!$this->rssModel->saveRSSFile($eventId, $rssContent)){
-                throw new Exception('Error saving RSS file');
-            }
 
 //            $recipients = $this->rssModel->getRecipients();
 //            if(empty($recipients)){
@@ -36,21 +34,32 @@ class RSSFeedController{
 //                ]);
 //            }
 
-//            $subject = 'New Sport Event:  ' . $event['title'];
-//
-//            $htmlContent = $this->emailService->generateEmailContent($event);
+            $subject = 'New Sport Event:  ' . $event['title'];
+
+//            $htmlContent = $this->emailService->generateEmailContent($event, $rssHtml);
 //            $emailSent = $this->emailService->sendEmail(
 //                $recipients,
 //                $subject,
 //                $htmlContent,
-//                $rssContent,
-//                $eventId
 //            );
+//
+//            if(!$emailSent['overall_success']){
+//                http_response_code(400);
+//                echo json_encode([
+//                    'success' => false,
+//                    'message' => 'Error sending email',
+//                    'errors' => array_filter($emailSent['details'], function($item){
+//                        return !$item['success'];
+//                    })
+//                ]);
+//                return;
+//            }
 
 
             echo json_encode([
                 'success' => true,
                 'message' => 'RSS feed generated successfully',
+                'rss_feed_url' => $this->rssModel->getEventUrl($eventId),
             ]);
         } catch(Exception $e){
             http_response_code($e->getCode() ?: 400);
@@ -59,5 +68,21 @@ class RSSFeedController{
                 'message' => $e->getMessage()
             ]);
         }
+    }
+    public function getEventRss(){
+
+        header('Content-Type: application/xml; charset=utf-8');
+        header('Cache-Control: max-age=3600');
+
+        $eventId = $_GET['event_id'];
+
+        $event = $this->rssModel->getEventDetails($eventId);
+        if(!$event){
+            http_response_code(404);
+            echo 'Event not found';
+            exit;
+        }
+        $rssContent = $this->rssModel->generateRSSFeed($event);
+        echo $rssContent;
     }
 }
