@@ -159,6 +159,9 @@ try {
     else if($_SERVER['REQUEST_METHOD'] === 'GET')
     {
         switch($endpoint){
+            case 'getEventRss':
+                $rssController->getEventRss();
+                break;
             case 'getEvents':
                 $eventController->listEvents();
                 break;
