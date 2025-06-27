@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 'basketball': 'images/basketball.jpg',
                 'tennis': 'images/tennis.jpg',
                 'volleyball': 'images/tennis.jpg', // Using tennis image as fallback
-                'multi-sport': 'images/tennis.jpg', // Using tennis image as fallback
+                'multi-sport': 'images/other.jpg', // Using tennis image as fallback
                 'yoga': 'images/yoga.jpg'
             };
 
