@@ -183,27 +183,44 @@ class AdminUsersController extends AdminController {
             $this->sendResponse(false, 'User ID is required');
         }
 
-        // Get user info for logging
-        $user = $this->userModel->getUserById($userId);
-        if (!$user) {
-            $this->sendResponse(false, 'User not found', null, 404);
+        try{
+            $this->db->beginTransaction();
+
+            // Get user info for logging
+            $user = $this->userModel->getUserById($userId);
+            if (!$user) {
+                $this->sendResponse(false, 'User not found', null, 404);
+            }
+
+            // Check if user has any events
+            $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM Events WHERE organizer_id = ?");
+            $stmt->execute([$userId]);
+            $eventCount = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+            if ($eventCount > 0) {
+                $this->sendResponse(false, 'Cannot delete user with existing events');
+            }
+
+            $stmt = $this->db->prepare("DELETE FROM EventParticipants WHERE user_id = ?");
+            $stmt->execute([$userId]);
+
+            $stmt = $this->db->prepare("DELETE FROM Events WHERE organizer_id = ?");
+            $stmt->execute([$userId]);
+
+            // Delete user
+            $stmt = $this->db->prepare("DELETE FROM Users WHERE user_id = ?");
+            $stmt->execute([$userId]);
+
+            $this->db->commit();
+
+            $this->logActivity('User deleted', "Deleted user: {$user['username']} ({$user['email']})");
+            $this->sendResponse(true, 'User deleted successfully');
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            $this->sendResponse(false, 'Error deleting user: ' . $e->getMessage());
         }
 
-        // Check if user has any events
-        $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM Events WHERE organizer_id = ?");
-        $stmt->execute([$userId]);
-        $eventCount = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-        if ($eventCount > 0) {
-            $this->sendResponse(false, 'Cannot delete user with existing events');
-        }
-
-        // Delete user
-        $stmt = $this->db->prepare("DELETE FROM Users WHERE user_id = ?");
-        $stmt->execute([$userId]);
-
-        $this->logActivity('User deleted', "Deleted user: {$user['username']} ({$user['email']})");
-        $this->sendResponse(true, 'User deleted successfully');
     }
 }
 
