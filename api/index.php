@@ -130,6 +130,9 @@ try {
             case 'adminTestDatabase':
                 require_once __DIR__ . '/admin/test-database.php';
                 break;
+            case 'adminImportExport':
+                require_once __DIR__ . '/admin/import-export.php';
+                break;
             case 'setSession':
                 // Set PHP session from JWT
                 session_start();
@@ -201,6 +204,9 @@ try {
             case 'adminTestDatabase':
                 require_once __DIR__ . '/admin/test-database.php';
                 break;
+            case 'adminImportExport':
+                require_once __DIR__ . '/admin/import-export.php';
+                break;
             default:
                 http_response_code(404);
                 echo json_encode(['success' => false, 'message' => 'API endpoint not found']);
@@ -211,6 +217,16 @@ try {
            case 'updateProfile':
                $userController->updateUser();
                break;
+           case 'adminUsers':
+               require_once __DIR__ . '/admin/users.php';
+               $controller = new AdminUsersController();
+               $controller->handleRequest();
+               break;
+           case 'adminEvents':
+               require_once __DIR__ . '/admin/events.php';
+               $controller = new AdminEventsController();
+               $controller->handleRequest();
+               break;
             default:
                 http_response_code(404);
                 echo json_encode(['success' => false, 'message' => 'API endpoint not found']);
@@ -220,6 +236,16 @@ try {
         switch ($endpoint){
             case 'leaveEvent':
                 $eventController->leaveEvent();
+                break;
+            case 'adminUsers':
+                require_once __DIR__ . '/admin/users.php';
+                $controller = new AdminUsersController();
+                $controller->handleRequest();
+                break;
+            case 'adminEvents':
+                require_once __DIR__ . '/admin/events.php';
+                $controller = new AdminEventsController();
+                $controller->handleRequest();
                 break;
             default:
                 http_response_code(404);

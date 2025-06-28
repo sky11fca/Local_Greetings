@@ -31,6 +31,7 @@ class AdminDashboard {
 
     async makeAuthenticatedRequest(url, options = {}) {
         if (!this.checkAuth()) {
+            console.error('Authentication check failed');
             return null;
         }
 
@@ -40,10 +41,13 @@ class AdminDashboard {
         };
 
         try {
+            console.log('Making request to:', url, 'with options:', defaultOptions);
             const response = await fetch(url, defaultOptions);
+            console.log('Response status:', response.status);
             
             // If unauthorized, redirect to login
             if (response.status === 401) {
+                console.error('Unauthorized - redirecting to login');
                 localStorage.removeItem('jwt_token');
                 localStorage.removeItem('user');
                 window.location.href = '/local_greeter/app/pages/login.php';
@@ -96,6 +100,24 @@ class AdminDashboard {
 
         document.getElementById('field-type-filter')?.addEventListener('change', () => {
             this.loadFields();
+        });
+
+        // Import/Export functionality
+        document.getElementById('export-btn')?.addEventListener('click', () => {
+            this.exportData();
+        });
+
+        document.getElementById('import-btn')?.addEventListener('click', () => {
+            this.importData();
+        });
+
+        // Template download buttons
+        document.querySelectorAll('.template-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const type = e.target.dataset.type;
+                const format = e.target.dataset.format;
+                this.downloadTemplate(type, format);
+            });
         });
 
         // Modal functionality
@@ -158,6 +180,9 @@ class AdminDashboard {
                 break;
             case 'fields':
                 this.loadFields();
+                break;
+            case 'data':
+                // Data management tab doesn't need initial loading
                 break;
             case 'system':
                 this.loadSystemData();
@@ -249,17 +274,24 @@ class AdminDashboard {
     async loadUsers(page = 1) {
         const search = document.getElementById('user-search')?.value || '';
         const tbody = document.getElementById('users-tbody');
+        
         try {
+            console.log('Loading users...');
             const response = await this.makeAuthenticatedRequest(`/local_greeter/api/index.php?action=adminUsers&page=${page}&search=${encodeURIComponent(search)}`);
             if (!response) {
+                console.error('No response from server');
                 tbody.innerHTML = '<tr><td colspan="7">Failed to load users. Please try again later.</td></tr>';
                 return;
             }
+            
             const data = await response.json();
-            if (data.success && data.data) {
+            console.log('Users response:', data);
+            
+            if (data.success) {
                 this.renderUsersTable(data.data.users);
                 this.renderPagination('users-pagination', data.data.pagination, (page) => this.loadUsers(page));
             } else {
+                console.error('Failed to load users:', data.message);
                 tbody.innerHTML = `<tr><td colspan="7">${data.message || 'Failed to load users.'}</td></tr>`;
             }
         } catch (error) {
@@ -283,7 +315,16 @@ class AdminDashboard {
                 <td><span class="badge ${user.is_admin ? 'badge-admin' : 'badge-user'}">${user.is_admin ? 'Admin' : 'User'}</span></td>
                 <td><span class="status-active">Active</span></td>
                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
-                <td></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-sm btn-primary" onclick="adminDashboard.editUser(${user.user_id})" title="Edit User">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="adminDashboard.deleteUser(${user.user_id})" title="Delete User">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
             </tr>
         `).join('');
     }
@@ -292,17 +333,24 @@ class AdminDashboard {
         const search = document.getElementById('event-search')?.value || '';
         const status = document.getElementById('event-status-filter')?.value || '';
         const tbody = document.getElementById('events-tbody');
+        
         try {
+            console.log('Loading events...');
             const response = await this.makeAuthenticatedRequest(`/local_greeter/api/index.php?action=adminEvents&page=${page}&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`);
             if (!response) {
+                console.error('No response from server');
                 tbody.innerHTML = '<tr><td colspan="9">Failed to load events. Please try again later.</td></tr>';
                 return;
             }
+            
             const data = await response.json();
+            console.log('Events response:', data);
+            
             if (data.success) {
                 this.renderEventsTable(data.data.events);
                 this.renderPagination('events-pagination', data.data.pagination, (page) => this.loadEvents(page));
             } else {
+                console.error('Failed to load events:', data.message);
                 tbody.innerHTML = `<tr><td colspan="9">${data.message || 'Failed to load events.'}</td></tr>`;
             }
         } catch (error) {
@@ -322,13 +370,22 @@ class AdminDashboard {
             <tr>
                 <td>${event.event_id}</td>
                 <td>${this.escapeHtml(event.title)}</td>
-                <td>${this.escapeHtml(event.organizer_name)}</td>
                 <td>${this.escapeHtml(event.field_name)}</td>
                 <td>${this.escapeHtml(event.sport_type)}</td>
                 <td>${new Date(event.start_time).toLocaleString()}</td>
+                <td>${new Date(event.end_time).toLocaleString()}</td>
                 <td>${event.current_participants}/${event.max_participants}</td>
                 <td><span class="status-${event.status}">${event.status}</span></td>
-                <td></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-sm btn-primary" onclick="adminDashboard.editEvent(${event.event_id})" title="Edit Event">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="adminDashboard.deleteEvent(${event.event_id})" title="Delete Event">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
             </tr>
         `).join('');
     }
@@ -418,32 +475,63 @@ class AdminDashboard {
 
     async editUser(userId) {
         try {
-            const response = await fetch(`/local_greeter/api/index.php?action=adminUsers&id=${userId}`);
+            const response = await this.makeAuthenticatedRequest(`/local_greeter/api/index.php?action=adminUsers&id=${userId}`);
+            if (!response) return;
+            
             const data = await response.json();
             
             if (data.success) {
-                const user = data.user;
+                const user = data.data.user;
                 document.getElementById('user-modal-title').textContent = 'Edit User';
                 document.getElementById('username').value = user.username;
                 document.getElementById('email').value = user.email;
                 document.getElementById('role').value = user.is_admin ? 'admin' : 'user';
                 document.getElementById('user-form').dataset.userId = userId;
                 document.getElementById('user-modal').style.display = 'block';
+            } else {
+                this.showNotification(data.message || 'Error loading user', 'error');
             }
         } catch (error) {
             console.error('Error loading user:', error);
+            this.showNotification('Error loading user', 'error');
         }
     }
 
     async saveUser() {
-        const formData = new FormData(document.getElementById('user-form'));
-        const userId = document.getElementById('user-form').dataset.userId;
+        const form = document.getElementById('user-form');
+        const userId = form.dataset.userId;
         
         try {
-            const response = await fetch('/local_greeter/api/index.php?action=adminUsers', {
-                method: userId ? 'PUT' : 'POST',
-                body: formData
-            });
+            let response;
+            
+            if (userId) {
+                // PUT request - convert FormData to URL-encoded string
+                const formData = new FormData(form);
+                const data = {};
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+                data.id = userId; // Add the user ID
+                
+                const urlEncodedData = new URLSearchParams(data).toString();
+                
+                response = await this.makeAuthenticatedRequest('/local_greeter/api/index.php?action=adminUsers', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: urlEncodedData
+                });
+            } else {
+                // POST request - use FormData
+                const formData = new FormData(form);
+                response = await this.makeAuthenticatedRequest('/local_greeter/api/index.php?action=adminUsers', {
+                    method: 'POST',
+                    body: formData
+                });
+            }
+            
+            if (!response) return;
             
             const data = await response.json();
             if (data.success) {
@@ -463,9 +551,11 @@ class AdminDashboard {
         if (!confirm('Are you sure you want to delete this user?')) return;
         
         try {
-            const response = await fetch(`/local_greeter/api/index.php?action=adminUsers&id=${userId}`, {
+            const response = await this.makeAuthenticatedRequest(`/local_greeter/api/index.php?action=adminUsers&id=${userId}`, {
                 method: 'DELETE'
             });
+            
+            if (!response) return;
             
             const data = await response.json();
             if (data.success) {
@@ -489,7 +579,9 @@ class AdminDashboard {
 
     async loadFieldsForSelect() {
         try {
-            const response = await fetch('/local_greeter/api/fields.php');
+            const response = await this.makeAuthenticatedRequest('/local_greeter/api/index.php?action=getSportsFields');
+            if (!response) return;
+            
             const data = await response.json();
             
             const select = document.getElementById('event-field');
@@ -507,38 +599,71 @@ class AdminDashboard {
 
     async editEvent(eventId) {
         try {
-            const response = await fetch(`/local_greeter/api/index.php?action=adminEvents&id=${eventId}`);
+            const response = await this.makeAuthenticatedRequest(`/local_greeter/api/index.php?action=adminEvents&id=${eventId}`);
+            if (!response) return;
+            
             const data = await response.json();
             
             if (data.success) {
-                const event = data.event;
+                const event = data.data.event;
                 document.getElementById('event-modal-title').textContent = 'Edit Event';
                 document.getElementById('event-title').value = event.title;
                 document.getElementById('event-description').value = event.description;
-                document.getElementById('event-field').value = event.field_id;
                 document.getElementById('event-sport').value = event.sport_type;
                 document.getElementById('event-start').value = event.start_time.replace(' ', 'T');
                 document.getElementById('event-end').value = event.end_time.replace(' ', 'T');
                 document.getElementById('event-max').value = event.max_participants;
                 document.getElementById('event-form').dataset.eventId = eventId;
-                
-                this.loadFieldsForSelect();
+
+                // Load fields, then set the value
+                await this.loadFieldsForSelect();
+                document.getElementById('event-field').value = event.field_id;
+
                 document.getElementById('event-modal').style.display = 'block';
+            } else {
+                this.showNotification(data.message || 'Error loading event', 'error');
             }
         } catch (error) {
             console.error('Error loading event:', error);
+            this.showNotification('Error loading event', 'error');
         }
     }
 
     async saveEvent() {
-        const formData = new FormData(document.getElementById('event-form'));
-        const eventId = document.getElementById('event-form').dataset.eventId;
+        const form = document.getElementById('event-form');
+        const eventId = form.dataset.eventId;
         
         try {
-            const response = await fetch('/local_greeter/api/index.php?action=adminEvents', {
-                method: eventId ? 'PUT' : 'POST',
-                body: formData
-            });
+            let response;
+            
+            if (eventId) {
+                // PUT request - convert FormData to URL-encoded string
+                const formData = new FormData(form);
+                const data = {};
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+                data.id = eventId; // Add the event ID
+                
+                const urlEncodedData = new URLSearchParams(data).toString();
+                
+                response = await this.makeAuthenticatedRequest('/local_greeter/api/index.php?action=adminEvents', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: urlEncodedData
+                });
+            } else {
+                // POST request - use FormData
+                const formData = new FormData(form);
+                response = await this.makeAuthenticatedRequest('/local_greeter/api/index.php?action=adminEvents', {
+                    method: 'POST',
+                    body: formData
+                });
+            }
+            
+            if (!response) return;
             
             const data = await response.json();
             if (data.success) {
@@ -558,9 +683,11 @@ class AdminDashboard {
         if (!confirm('Are you sure you want to delete this event?')) return;
         
         try {
-            const response = await fetch(`/local_greeter/api/index.php?action=adminEvents&id=${eventId}`, {
+            const response = await this.makeAuthenticatedRequest(`/local_greeter/api/index.php?action=adminEvents&id=${eventId}`, {
                 method: 'DELETE'
             });
+            
+            if (!response) return;
             
             const data = await response.json();
             if (data.success) {
@@ -678,49 +805,44 @@ class AdminDashboard {
     }
 
     showNotification(message, type = 'info') {
+        const container = document.getElementById('notification-container');
+        if (!container) return;
+        
         // Create notification element
         const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.textContent = message;
+        notification.className = `notification ${type}`;
         
-        // Add styles
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 10000;
-            animation: slideIn 0.3s ease;
-        `;
+        // Create content
+        const content = document.createElement('div');
+        content.className = 'notification-content';
+        content.textContent = message;
         
-        // Set background color based on type
-        switch (type) {
-            case 'success':
-                notification.style.backgroundColor = '#28a745';
-                break;
-            case 'error':
-                notification.style.backgroundColor = '#dc3545';
-                break;
-            case 'warning':
-                notification.style.backgroundColor = '#ffc107';
-                notification.style.color = '#212529';
-                break;
-            default:
-                notification.style.backgroundColor = '#007bff';
-        }
+        // Create close button
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'notification-close';
+        closeBtn.innerHTML = '&times;';
+        closeBtn.onclick = () => this.removeNotification(notification);
         
-        document.body.appendChild(notification);
+        // Assemble notification
+        notification.appendChild(content);
+        notification.appendChild(closeBtn);
+        container.appendChild(notification);
         
-        // Remove after 3 seconds
+        // Auto remove after 5 seconds
         setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease';
+            this.removeNotification(notification);
+        }, 5000);
+    }
+
+    removeNotification(notification) {
+        if (notification && notification.parentNode) {
+            notification.classList.add('removing');
             setTimeout(() => {
-                document.body.removeChild(notification);
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
             }, 300);
-        }, 3000);
+        }
     }
 
     escapeHtml(text) {
@@ -739,6 +861,258 @@ class AdminDashboard {
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
+    }
+
+    // Import/Export Methods
+    async exportData() {
+        const dataType = document.getElementById('export-type').value;
+        const format = document.getElementById('export-format').value;
+        const exportBtn = document.getElementById('export-btn');
+        
+        try {
+            exportBtn.classList.add('loading');
+            exportBtn.disabled = true;
+            
+            const url = `/local_greeter/api/index.php?action=adminImportExport&operation=export&type=${dataType}&format=${format}`;
+            
+            // Check authentication first
+            if (!this.checkAuth()) {
+                throw new Error('Authentication failed');
+            }
+            
+            // Make the request with proper headers
+            const adminToken = localStorage.getItem('jwt_token');
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${adminToken}`,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            // Parse the response
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.message || 'Export failed');
+            }
+            
+            // Get the file content from the response
+            const fileContent = result.content;
+            const filename = result.filename || `${dataType}_export_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.${format}`;
+            
+            // Create blob and download
+            const blob = new Blob([fileContent], { 
+                type: result.contentType || (format === 'json' ? 'application/json' : 'text/csv')
+            });
+            const downloadUrl = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up the URL object
+            URL.revokeObjectURL(downloadUrl);
+            
+            this.showNotification(`Data exported successfully in ${format.toUpperCase()} format`, 'success');
+            
+        } catch (error) {
+            console.error('Export failed:', error);
+            this.showNotification('Export failed: ' + error.message, 'error');
+        } finally {
+            exportBtn.classList.remove('loading');
+            exportBtn.disabled = false;
+        }
+    }
+
+    async importData() {
+        const dataType = document.getElementById('import-type').value;
+        const format = document.getElementById('import-format').value;
+        const fileInput = document.getElementById('import-file');
+        const importBtn = document.getElementById('import-btn');
+        
+        if (!fileInput.files || fileInput.files.length === 0) {
+            this.showNotification('Please select a file to import', 'warning');
+            return;
+        }
+        
+        const file = fileInput.files[0];
+        
+        try {
+            importBtn.classList.add('loading');
+            importBtn.disabled = true;
+            
+            const fileContent = await this.readFileContent(file);
+            const url = `/local_greeter/api/index.php?action=adminImportExport&operation=import&type=${dataType}&format=${format}`;
+            
+            const response = await this.makeAuthenticatedRequest(url, {
+                method: 'POST',
+                body: fileContent
+            });
+            
+            if (!response) {
+                throw new Error('Request failed');
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this.showImportResults(result.data);
+                this.showNotification('Import completed successfully', 'success');
+                
+                // Refresh relevant data if on users or events tab
+                if (dataType === 'users' && this.currentTab === 'users') {
+                    this.loadUsers();
+                } else if (dataType === 'events' && this.currentTab === 'events') {
+                    this.loadEvents();
+                }
+            } else {
+                throw new Error(result.message || 'Import failed');
+            }
+            
+        } catch (error) {
+            console.error('Import failed:', error);
+            this.showNotification('Import failed: ' + error.message, 'error');
+        } finally {
+            importBtn.classList.remove('loading');
+            importBtn.disabled = false;
+            fileInput.value = ''; // Clear file input
+        }
+    }
+
+    readFileContent(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                resolve(e.target.result);
+            };
+            
+            reader.onerror = (e) => {
+                reject(new Error('Failed to read file'));
+            };
+            
+            reader.readAsText(file);
+        });
+    }
+
+    showImportResults(results) {
+        const resultsContainer = document.getElementById('import-results');
+        const resultsContent = document.getElementById('import-results-content');
+        
+        let html = '';
+        
+        if (results.imported > 0) {
+            html += `<div class="import-success">✓ Successfully imported: ${results.imported} items</div>`;
+        }
+        
+        if (results.skipped > 0) {
+            html += `<div class="import-warning">⚠ Skipped: ${results.skipped} items (already exist)</div>`;
+        }
+        
+        if (results.errors && results.errors.length > 0) {
+            html += `<div class="import-error">✗ Errors: ${results.errors.length} items failed</div>`;
+            html += '<div style="margin-top: 10px;">';
+            results.errors.forEach(error => {
+                html += `<div style="color: #dc3545; margin: 5px 0;">• ${this.escapeHtml(error)}</div>`;
+            });
+            html += '</div>';
+        }
+        
+        resultsContent.innerHTML = html;
+        resultsContainer.style.display = 'block';
+        
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+            resultsContainer.style.display = 'none';
+        }, 10000);
+    }
+
+    downloadTemplate(type, format) {
+        const templates = {
+            users: {
+                csv: 'username,email,is_admin,reputation_score\njohn_doe,john@example.com,0,0\njane_admin,jane@example.com,1,100',
+                json: JSON.stringify([
+                    {
+                        "username": "john_doe",
+                        "email": "john@example.com",
+                        "is_admin": 0,
+                        "reputation_score": 0
+                    },
+                    {
+                        "username": "jane_admin",
+                        "email": "jane@example.com",
+                        "is_admin": 1,
+                        "reputation_score": 100
+                    }
+                ], null, 2)
+            },
+            events: {
+                csv: 'title,description,sport_type,start_time,end_time,max_participants,current_participants,status,field_name,creator_name\nBasketball Game,Weekly basketball game,basketball,2024-01-15 18:00:00,2024-01-15 20:00:00,10,0,upcoming,Main Court,john_doe',
+                json: JSON.stringify([
+                    {
+                        "title": "Basketball Game",
+                        "description": "Weekly basketball game",
+                        "sport_type": "basketball",
+                        "start_time": "2024-01-15 18:00:00",
+                        "end_time": "2024-01-15 20:00:00",
+                        "max_participants": 10,
+                        "current_participants": 0,
+                        "status": "upcoming",
+                        "field_name": "Main Court",
+                        "creator_name": "john_doe"
+                    }
+                ], null, 2)
+            },
+            fields: {
+                csv: 'name,sport_type,location,longitude,latitude,is_public\nMain Court,basketball,Central Park,40.7589,-73.9851,1\nTennis Court,tennis,Sports Complex,40.7589,-73.9851,1',
+                json: JSON.stringify([
+                    {
+                        "name": "Main Court",
+                        "sport_type": "basketball",
+                        "location": "Central Park",
+                        "longitude": 40.7589,
+                        "latitude": -73.9851,
+                        "is_public": 1
+                    },
+                    {
+                        "name": "Tennis Court",
+                        "sport_type": "tennis",
+                        "location": "Sports Complex",
+                        "longitude": 40.7589,
+                        "latitude": -73.9851,
+                        "is_public": 1
+                    }
+                ], null, 2)
+            }
+        };
+        
+        const template = templates[type][format];
+        const filename = `${type}_template.${format}`;
+        
+        // Create and download file
+        const blob = new Blob([template], { type: format === 'json' ? 'application/json' : 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+        this.showNotification(`Template downloaded: ${filename}`, 'success');
     }
 }
 

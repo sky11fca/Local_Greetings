@@ -11,7 +11,12 @@ class AdminEventsController extends AdminController {
     }
     
     public function handleRequest() {
-        $user = $this->checkAdminAuth();
+        try {
+            $user = $this->checkAdminAuth();
+        } catch (Exception $e) {
+            $this->sendResponse(false, $e->getMessage(), null, $e->getCode());
+            return;
+        }
         
         $method = $_SERVER['REQUEST_METHOD'];
         
@@ -220,30 +225,27 @@ class AdminEventsController extends AdminController {
     }
     
     private function deleteEvent() {
-        try {
-            $eventId = $_GET['id'] ?? null;
-            
-            if (!$eventId) {
-                $this->sendResponse(false, 'Event ID is required');
-            }
-            
-            // Get event info for logging
-            $event = $this->eventModel->getEventById($eventId);
-            if (!$event) {
-                $this->sendResponse(false, 'Event not found', null, 404);
-            }
-            
-            $result = $this->eventModel->deleteEvent($eventId, 0); // 0 for admin override
-            
-            if ($result['success']) {
-                $this->logActivity('Event deleted', "Deleted event: {$event['title']}");
-                $this->sendResponse(true, 'Event deleted successfully');
-            } else {
-                $this->sendResponse(false, $result['message']);
-            }
-            
-        } catch (Exception $e) {
-            $this->sendResponse(false, 'Error deleting event: ' . $e->getMessage());
+        // Fix: Parse ID from query string for DELETE requests
+        parse_str($_SERVER['QUERY_STRING'] ?? '', $query);
+        $eventId = $query['id'] ?? null;
+
+        if (!$eventId) {
+            $this->sendResponse(false, 'Event ID is required');
+        }
+
+        // Get event info for logging
+        $event = $this->eventModel->getEventById($eventId);
+        if (!$event) {
+            $this->sendResponse(false, 'Event not found', null, 404);
+        }
+
+        $result = $this->eventModel->deleteEvent($eventId, 0); // 0 for admin override
+
+        if ($result['success']) {
+            $this->logActivity('Event deleted', "Deleted event: {$event['title']}");
+            $this->sendResponse(true, 'Event deleted successfully');
+        } else {
+            $this->sendResponse(false, $result['message']);
         }
     }
 }

@@ -13,6 +13,19 @@ class AdminController {
     }
     
     protected function checkAdminAuth() {
+        // First check session-based authentication
+        session_start();
+        if (isset($_SESSION['user_id']) && isset($_SESSION['is_admin']) && $_SESSION['is_admin']) {
+            // Return user data from session
+            return [
+                'user_id' => $_SESSION['user_id'],
+                'username' => $_SESSION['username'] ?? '',
+                'email' => $_SESSION['email'] ?? '',
+                'is_admin' => $_SESSION['is_admin']
+            ];
+        }
+        
+        // Fallback to JWT authentication
         $headers = getallheaders();
         $token = null;
         
@@ -30,7 +43,7 @@ class AdminController {
         }
         
         if (!$token) {
-            return $this->sendResponse(false, 'No authentication token provided', null, 401);
+            throw new Exception('No authentication token provided', 401);
         }
         
         try {
@@ -39,12 +52,12 @@ class AdminController {
             
             // Check if user is admin
             if (!isset($user['is_admin']) || !$user['is_admin']) {
-                return $this->sendResponse(false, 'Admin access required', null, 403);
+                throw new Exception('Admin access required', 403);
             }
             
             return $user;
         } catch (Exception $e) {
-            return $this->sendResponse(false, 'Invalid authentication token', null, 401);
+            throw new Exception('Invalid authentication token', 401);
         }
     }
     

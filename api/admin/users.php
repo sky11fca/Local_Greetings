@@ -11,7 +11,12 @@ class AdminUsersController extends AdminController {
     }
     
     public function handleRequest() {
-        $user = $this->checkAdminAuth();
+        try {
+            $user = $this->checkAdminAuth();
+        } catch (Exception $e) {
+            $this->sendResponse(false, $e->getMessage(), null, $e->getCode());
+            return;
+        }
         
         $method = $_SERVER['REQUEST_METHOD'];
         
@@ -170,38 +175,35 @@ class AdminUsersController extends AdminController {
     }
     
     private function deleteUser() {
-        try {
-            $userId = $_GET['id'] ?? null;
-            
-            if (!$userId) {
-                $this->sendResponse(false, 'User ID is required');
-            }
-            
-            // Get user info for logging
-            $user = $this->userModel->getUserById($userId);
-            if (!$user) {
-                $this->sendResponse(false, 'User not found', null, 404);
-            }
-            
-            // Check if user has any events
-            $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM Events WHERE organizer_id = ?");
-            $stmt->execute([$userId]);
-            $eventCount = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-            
-            if ($eventCount > 0) {
-                $this->sendResponse(false, 'Cannot delete user with existing events');
-            }
-            
-            // Delete user
-            $stmt = $this->db->prepare("DELETE FROM Users WHERE user_id = ?");
-            $stmt->execute([$userId]);
-            
-            $this->logActivity('User deleted', "Deleted user: {$user['username']} ({$user['email']})");
-            $this->sendResponse(true, 'User deleted successfully');
-            
-        } catch (Exception $e) {
-            $this->sendResponse(false, 'Error deleting user: ' . $e->getMessage());
+        // Fix: Parse ID from query string for DELETE requests
+        parse_str($_SERVER['QUERY_STRING'] ?? '', $query);
+        $userId = $query['id'] ?? null;
+
+        if (!$userId) {
+            $this->sendResponse(false, 'User ID is required');
         }
+
+        // Get user info for logging
+        $user = $this->userModel->getUserById($userId);
+        if (!$user) {
+            $this->sendResponse(false, 'User not found', null, 404);
+        }
+
+        // Check if user has any events
+        $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM Events WHERE organizer_id = ?");
+        $stmt->execute([$userId]);
+        $eventCount = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+        if ($eventCount > 0) {
+            $this->sendResponse(false, 'Cannot delete user with existing events');
+        }
+
+        // Delete user
+        $stmt = $this->db->prepare("DELETE FROM Users WHERE user_id = ?");
+        $stmt->execute([$userId]);
+
+        $this->logActivity('User deleted', "Deleted user: {$user['username']} ({$user['email']})");
+        $this->sendResponse(true, 'User deleted successfully');
     }
 }
 

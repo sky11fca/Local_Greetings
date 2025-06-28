@@ -42,7 +42,7 @@ class SportsFieldController
     {
         header('Content-Type: application/json');
         $fields = $this->sportsFieldModel->getAllFieldsSimple();
-        echo json_encode(['fields' => $fields]);
+        echo json_encode(['success' => true, 'fields' => $fields]);
     }
 
     public function getField($fieldId)
