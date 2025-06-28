@@ -365,9 +365,12 @@ class EventModel
 
     public function updateEvent($eventId, $userId, $data)
     {
-        // First, verify the user is the owner of the event
         $event = $this->getEventById($eventId);
-        if (!$event || $event['organizer_id'] != $userId) {
+        if (!$event) {
+            return ['success' => false, 'message' => 'Event not found.'];
+        }
+        // Allow admin override (userId = 0) or if user is the organizer
+        if ($userId !== 0 && $event['organizer_id'] != $userId) {
             return ['success' => false, 'message' => 'You are not authorized to edit this event.'];
         }
 
@@ -376,6 +379,7 @@ class EventModel
             return ['success' => false, 'message' => 'Start time must be before end time.'];
         }
 
+        // Build SQL and params
         $sql = "UPDATE Events SET 
                     title = :title, 
                     description = :description, 
@@ -383,23 +387,26 @@ class EventModel
                     start_time = :start_time, 
                     end_time = :end_time, 
                     max_participants = :max_participants
-                WHERE event_id = :event_id AND organizer_id = :organizer_id";
+                WHERE event_id = :event_id";
+        $params = [
+            ':title' => $data['title'],
+            ':description' => $data['description'],
+            ':field_id' => $data['field_id'],
+            ':start_time' => $data['start_time'],
+            ':end_time' => $data['end_time'],
+            ':max_participants' => $data['max_participants'],
+            ':event_id' => $eventId
+        ];
+        // If not admin, restrict to organizer
+        if ($userId !== 0) {
+            $sql .= " AND organizer_id = :organizer_id";
+            $params[':organizer_id'] = $userId;
+        }
 
         try {
             $this->db->beginTransaction();
-
             $stmt = $this->db->prepare($sql);
-            $stmt->execute([
-                ':title' => $data['title'],
-                ':description' => $data['description'],
-                ':field_id' => $data['field_id'],
-                ':start_time' => $data['start_time'],
-                ':end_time' => $data['end_time'],
-                ':max_participants' => $data['max_participants'],
-                ':event_id' => $eventId,
-                ':organizer_id' => $userId
-            ]);
-
+            $stmt->execute($params);
             $this->db->commit();
             return ['success' => true, 'message' => 'Event updated successfully.'];
         } catch (PDOException $e) {
@@ -410,19 +417,23 @@ class EventModel
 
     public function deleteEvent($eventId, $userId)
     {
-        // First, verify the user is the owner of the event
+        // First, verify the user is the owner of the event OR if userId is 0 (admin override)
         $event = $this->getEventById($eventId);
-        if (!$event || $event['organizer_id'] != $userId) {
+        if (!$event) {
+            return ['success' => false, 'message' => 'Event not found.'];
+        }
+        
+        // Allow admin override (userId = 0) or if user is the organizer
+        if ($userId !== 0 && $event['organizer_id'] != $userId) {
             return ['success' => false, 'message' => 'You are not authorized to delete this event.'];
         }
 
-        $sql = "DELETE FROM Events WHERE event_id = :event_id AND organizer_id = :organizer_id";
+        $sql = "DELETE FROM Events WHERE event_id = :event_id";
 
         try {
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
-                ':event_id' => $eventId,
-                ':organizer_id' => $userId
+                ':event_id' => $eventId
             ]);
             
             // The database's ON DELETE CASCADE will handle removing participants
