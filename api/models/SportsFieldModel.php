@@ -30,6 +30,13 @@ class SportsFieldModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getAllFieldsWithCoordinates()
+    {
+        $stmt = $this->db->prepare("SELECT field_id, name, address, ST_Y(location) AS latitude, ST_X(location) AS longitude FROM SportsFields ORDER BY name ASC");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function searchFields($searchQuery, $sportType, $limit, $offset)
     {
         $sql = "SELECT 

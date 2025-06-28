@@ -45,6 +45,13 @@ class SportsFieldController
         echo json_encode(['success' => true, 'fields' => $fields]);
     }
 
+    public function listAllFieldsWithCoordinates()
+    {
+        header('Content-Type: application/json');
+        $fields = $this->sportsFieldModel->getAllFieldsWithCoordinates();
+        echo json_encode(['success' => true, 'fields' => $fields]);
+    }
+
     public function getField($fieldId)
     {
         header('Content-Type: application/json');

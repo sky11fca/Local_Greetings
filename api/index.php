@@ -178,7 +178,7 @@ try {
                 $sportsFieldController->listFields();
                 break;
             case 'getSportsFields':
-                $sportsFieldController->listAllFieldsSimple();
+                $sportsFieldController->listAllFieldsWithCoordinates();
                 break;
             case 'adminStats':
                 require_once __DIR__ . '/admin/stats.php';
