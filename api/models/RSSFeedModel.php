@@ -63,20 +63,32 @@ class RSSFeedModel
         return $rss->asXML();
     }
 
-    public function saveRSSFile($eventId, $rssContent){
-        $rssDir = __DIR__ . "/../../public/rss/";
-        if(!file_exists($rssDir)){
-            mkdir($rssDir, 0755, true);
+    public function rssToHtml($rssContent)
+    {
+        $rss = simplexml_load_string($rssContent);
+        if(!$rss){
+            return false;
         }
 
-        $rssFileName = 'event_' . $eventId . '.xml';
-        return file_put_contents($rssDir . $rssFileName, $rssContent);
+        $html = '<div class="rss-event">';
+        foreach ($rss->channel->item as $item) {
+            $html .= '<h2>' . htmlspecialchars($item->title) . '</h2>';
+            $html .= '<div class="event-details">';
+            $html .= nl2br(htmlspecialchars($item->description));
+            $html .= '</div>';
+            $html .= '<div class="event-meta">';
+            $html .= '<p>Published: ' . date('Y-m-d H:i', strtotime($item->pubDate)) . '</p>';
+            $html .= '</div>';
+        }
+        $html .= '</div>';
+
+        return $html;
     }
 
-
-    //TODO solve with the event url and stuff
-    private function getEventUrl($eventId){
-        return 'http://localhost:8080/api/events/' . $eventId;
+    public function getEventUrl($eventId)
+    {
+        return 'http://' . $_SERVER['HTTP_HOST'] . '/local_greeter/api/events/' . $eventId;
     }
+
 
 }
