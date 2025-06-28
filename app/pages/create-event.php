@@ -10,11 +10,13 @@ $currentPage = "create-event";
 
 // Additional CSS files for this page
 $additionalCSS = [
-    "/local_greeter/public/css/create-event.css"
+    "/local_greeter/public/css/create-event.css",
+    "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 ];
 
 // Additional scripts for this page
 $additionalScripts = [
+    "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
     "/local_greeter/public/js/create-event.js"
 ];
 
@@ -35,8 +37,19 @@ include __DIR__ . '/../templates/header.php';
                     <label for="description">Description</label>
                     <textarea id="description" name="description" placeholder="Describe your event..." rows="5" required></textarea>
                 </div>
+                
+                <!-- Map Section -->
                 <div class="form-group">
-                    <label for="sports_field_id">Sports Field</label>
+                    <label>Select Sports Field from Map</label>
+                    <div id="field-map" style="height: 400px; width: 100%; border-radius: 5px; margin-bottom: 10px;"></div>
+                    <div id="selected-field-info" class="selected-field-info" style="display: none;">
+                        <strong>Selected Field:</strong> <span id="selected-field-name"></span>
+                        <button type="button" id="clear-selection" class="btn btn-secondary btn-sm">Clear Selection</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sports_field_id">Sports Field (or select from map above)</label>
                     <select id="sports_field_id" name="sports_field_id" required>
                         <option value="">Loading fields...</option>
                     </select>

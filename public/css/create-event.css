@@ -20,7 +20,7 @@ body {
     padding: 40px;
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
+    max-width: 800px;
     margin: 0 auto;
     text-align: left;
 }
@@ -63,6 +63,69 @@ body {
 
 #createEventForm .btn-block {
     margin-top: 30px;
+}
+
+/* Map Styles */
+#field-map {
+    border: 2px solid #ced4da;
+    transition: border-color 0.3s ease;
+}
+
+#field-map:hover {
+    border-color: var(--primary-color);
+}
+
+.selected-field-info {
+    background-color: #e8f5e8;
+    border: 1px solid #28a745;
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.selected-field-info strong {
+    color: #155724;
+}
+
+#selected-field-name {
+    color: #155724;
+    font-weight: 500;
+}
+
+#clear-selection {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+#clear-selection:hover {
+    background-color: #5a6268;
+}
+
+/* Leaflet Map Customization */
+.leaflet-popup-content {
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.leaflet-popup-content b {
+    color: var(--primary-color);
+}
+
+/* Field marker styles */
+.field-marker {
+    cursor: pointer;
+}
+
+.field-marker.selected {
+    filter: hue-rotate(120deg) brightness(1.2);
 }
 
 #edit-event-section, #edit-event-section h2, #editEventForm, #editEventForm label, #editEventForm input, #editEventForm textarea, #editEventForm select {
