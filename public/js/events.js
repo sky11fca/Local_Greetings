@@ -67,13 +67,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             url.searchParams.set('limit', limit);
             url.searchParams.set('offset', offset);
 
-            if (currentTab === 'public') {
-                if (filters.sportType) {
-                    url.searchParams.set('sport_type', filters.sportType);
-                }
-                if (filters.search) {
-                    url.searchParams.set('search', filters.search);
-                }
+            // if (currentTab === 'public') {
+            //     if (filters.sportType) {
+            //         url.searchParams.set('sport_type', filters.sportType);
+            //     }
+            //     if (filters.search) {
+            //         url.searchParams.set('search', filters.search);
+            //     }
+            // }
+
+            if (filters.sportType) {
+                url.searchParams.set('sport_type', filters.sportType);
+            }
+            if (filters.search) {
+                url.searchParams.set('search', filters.search);
             }
 
             const token = localStorage.getItem('jwt_token');
