@@ -44,21 +44,9 @@ class Router {
     
     private function load404() {
         http_response_code(404);
-        $pageTitle = "404 - Page Not Found";
-        $currentPage = "404";
-        include __DIR__ . '/templates/header.php';
-        ?>
-        <main>
-            <div class="container">
-                <div class="error-page">
-                    <h1>404 - Page Not Found</h1>
-                    <p>The page you're looking for doesn't exist.</p>
-                    <a href="/local_greeter/" class="btn btn-primary">Go Home</a>
-                </div>
-            </div>
-        </main>
-        <?php
-        include __DIR__ . '/templates/footer.php';
+        //$pageTitle = "404 - Page Not Found";
+        //$currentPage = "404";
+        require __DIR__ . "/pages/not-found.php";
     }
 }
 ?> 
