@@ -58,6 +58,14 @@ class UserController {
 
             $userId = $payload['user_id'];
             $data = json_decode(file_get_contents('php://input'), true);
+
+            if(!filter_var($data['email'], FILTER_VALIDATE_EMAIL)){
+                throw new Exception('Invalid email');
+            }
+
+            if(!preg_match('/^[a-zA-Z0-9]+$/', $data['password'])){
+                throw new Exception('Invalid password');
+            }
             
             $user = $this->userModel->getUserById($userId);
             if(!$user){
@@ -66,6 +74,10 @@ class UserController {
 
             if(!empty($data['password'])){
                 $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT);
+            }
+
+            if(strlen($data['password']) < 8){
+                throw new Exception('Password must be at least 8 characters');
             }
 
             $rowcount = $this->userModel->updateWithPassword(
