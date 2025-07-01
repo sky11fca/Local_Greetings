@@ -22,6 +22,17 @@ class AuthController
                 throw new Exception('Invalid input');
             }
 
+            if(!filter_var($data['email'], FILTER_VALIDATE_EMAIL)){
+                throw new Exception('Invalid email');
+            }
+
+            if(!preg_match('/^[a-zA-Z0-9]+$/', $data['password'])){
+                throw new Exception('Invalid password');
+            }
+            if(strlen($data['password']) < 8){
+                throw new Exception('Password must be at least 8 characters');
+            }
+
             $user = $this->userModel->login($data['email'], $data['password']);
 
             if(!$user){
@@ -62,6 +73,18 @@ class AuthController
                 throw new Exception('Invalid input');
             }
 
+            if(!filter_var($data['email'], FILTER_VALIDATE_EMAIL)){
+                throw new Exception('Invalid email');
+            }
+
+            if(!preg_match('/^[a-zA-Z0-9]+$/', $data['password'])){
+                throw new Exception('Invalid password');
+            }
+
+            if(strlen($data['password']) < 8){
+                throw new Exception('Password must be at least 8 characters');
+            }
+
             $userId = $this->userModel->register(
                 $data['username'],
                 $data['email'],
@@ -80,32 +103,32 @@ class AuthController
         }
     }
 
-    public function validateToken(){
-        try{
-            $headers = getallheaders();
-            $authHeader = $headers['Authorization'] ?? '';
-
-            if (empty($authHeader) || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-                throw new Exception('Authorization token is required', 401);
-            }
-
-            $token = $matches[1];
-            $payload = JWT::validate($token);
-
-            if (!$payload) {
-                throw new Exception('Invalid or expired token', 401);
-            }
-
-            echo json_encode([
-                'success' => true,
-                'user' => $payload
-            ]);
-        }catch (Exception $e) {
-            http_response_code($e->getCode() ?: 401);
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
-        }
-    }
+//    public function validateToken(){
+//        try{
+//            $headers = getallheaders();
+//            $authHeader = $headers['Authorization'] ?? '';
+//
+//            if (empty($authHeader) || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+//                throw new Exception('Authorization token is required', 401);
+//            }
+//
+//            $token = $matches[1];
+//            $payload = JWT::validate($token);
+//
+//            if (!$payload) {
+//                throw new Exception('Invalid or expired token', 401);
+//            }
+//
+//            echo json_encode([
+//                'success' => true,
+//                'user' => $payload
+//            ]);
+//        }catch (Exception $e) {
+//            http_response_code($e->getCode() ?: 401);
+//            echo json_encode([
+//                'success' => false,
+//                'message' => $e->getMessage()
+//            ]);
+//        }
+//    }
 }

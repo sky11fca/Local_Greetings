@@ -58,6 +58,11 @@ class UserController {
 
             $userId = $payload['user_id'];
             $data = json_decode(file_get_contents('php://input'), true);
+
+            if(!filter_var($data['email'], FILTER_VALIDATE_EMAIL)){
+                throw new Exception('Invalid email');
+            }
+
             
             $user = $this->userModel->getUserById($userId);
             if(!$user){
