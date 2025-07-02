@@ -22,17 +22,6 @@ class AuthController
                 throw new Exception('Invalid input');
             }
 
-            if(!filter_var($data['email'], FILTER_VALIDATE_EMAIL)){
-                throw new Exception('Invalid email');
-            }
-
-            if(!preg_match('/^[a-zA-Z0-9]+$/', $data['password'])){
-                throw new Exception('Invalid password');
-            }
-            if(strlen($data['password']) < 8){
-                throw new Exception('Password must be at least 8 characters');
-            }
-
             $user = $this->userModel->login($data['email'], $data['password']);
 
             if(!$user){
@@ -71,18 +60,6 @@ class AuthController
 
             if(empty($data['username']) || empty($data['email']) || empty($data['password'])){
                 throw new Exception('Invalid input');
-            }
-
-            if(!filter_var($data['email'], FILTER_VALIDATE_EMAIL)){
-                throw new Exception('Invalid email');
-            }
-
-            if(!preg_match('/^[a-zA-Z0-9]+$/', $data['password'])){
-                throw new Exception('Invalid password');
-            }
-
-            if(strlen($data['password']) < 8){
-                throw new Exception('Password must be at least 8 characters');
             }
 
             $userId = $this->userModel->register(
