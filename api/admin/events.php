@@ -142,11 +142,13 @@ class AdminEventsController extends AdminController {
             
             if (empty($title) || empty($description) || empty($fieldId) || empty($sportType) || empty($startTime) || empty($endTime) || empty($maxParticipants)) {
                 $this->sendResponse(false, 'All fields are required');
+                return;
             }
             
             // Validate times
             if (strtotime($startTime) >= strtotime($endTime)) {
                 $this->sendResponse(false, 'Start time must be before end time');
+                return;
             }
             
             // Use admin user as organizer
@@ -193,11 +195,13 @@ class AdminEventsController extends AdminController {
             
             if (!$eventId || empty($title) || empty($description) || empty($fieldId) || empty($sportType) || empty($startTime) || empty($endTime) || empty($maxParticipants)) {
                 $this->sendResponse(false, 'All fields are required');
+                return;
             }
             
             // Validate times
             if (strtotime($startTime) >= strtotime($endTime)) {
                 $this->sendResponse(false, 'Start time must be before end time');
+                return;
             }
             
             $eventData = [
@@ -231,12 +235,14 @@ class AdminEventsController extends AdminController {
 
         if (!$eventId) {
             $this->sendResponse(false, 'Event ID is required');
+            return;
         }
 
         // Get event info for logging
         $event = $this->eventModel->getEventById($eventId);
         if (!$event) {
             $this->sendResponse(false, 'Event not found', null, 404);
+            return;
         }
 
         $result = $this->eventModel->deleteEvent($eventId, 0); // 0 for admin override

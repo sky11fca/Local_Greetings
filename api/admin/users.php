@@ -107,6 +107,7 @@ class AdminUsersController extends AdminController {
             
             if (empty($username) || empty($email) || empty($password)) {
                 $this->sendResponse(false, 'Username, email, and password are required');
+                return;
             }
             
             // Check if email already exists
@@ -114,6 +115,7 @@ class AdminUsersController extends AdminController {
             $stmt->execute([$email]);
             if ($stmt->fetch()) {
                 $this->sendResponse(false, 'Email already exists');
+                return;
             }
             
             // Create user
@@ -144,6 +146,7 @@ class AdminUsersController extends AdminController {
             
             if (!$userId || empty($username) || empty($email)) {
                 $this->sendResponse(false, 'User ID, username, and email are required');
+                return;
             }
             
             // Check if email already exists for other users
@@ -151,6 +154,7 @@ class AdminUsersController extends AdminController {
             $stmt->execute([$email, $userId]);
             if ($stmt->fetch()) {
                 $this->sendResponse(false, 'Email already exists');
+                return;
             }
             
             $isAdmin = ($role === 'admin') ? 1 : 0;
@@ -181,6 +185,7 @@ class AdminUsersController extends AdminController {
 
         if (!$userId) {
             $this->sendResponse(false, 'User ID is required');
+            return;
         }
 
         try{
@@ -190,6 +195,7 @@ class AdminUsersController extends AdminController {
             $user = $this->userModel->getUserById($userId);
             if (!$user) {
                 $this->sendResponse(false, 'User not found', null, 404);
+                return;
             }
 
             // Check if user has any events
@@ -198,13 +204,12 @@ class AdminUsersController extends AdminController {
             $eventCount = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
             if ($eventCount > 0) {
-                $this->sendResponse(false, 'Cannot delete user with existing events');
+                // Delete all events organized by this user
+                $stmt = $this->db->prepare("DELETE FROM Events WHERE organizer_id = ?");
+                $stmt->execute([$userId]);
             }
 
             $stmt = $this->db->prepare("DELETE FROM EventParticipants WHERE user_id = ?");
-            $stmt->execute([$userId]);
-
-            $stmt = $this->db->prepare("DELETE FROM Events WHERE organizer_id = ?");
             $stmt->execute([$userId]);
 
             // Delete user

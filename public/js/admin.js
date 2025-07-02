@@ -500,10 +500,16 @@ class AdminDashboard {
     async saveUser() {
         const form = document.getElementById('user-form');
         const userId = form.dataset.userId;
-        
+        const username = form.username.value.trim();
+        const email = form.email.value.trim();
+        const password = form.password.value.trim();
+        const role = form.role.value;
+        if (!username || !email || (!userId && !password)) {
+            this.showNotification('Username, email, and password are required', 'error');
+            return;
+        }
         try {
             let response;
-            
             if (userId) {
                 // PUT request - convert FormData to URL-encoded string
                 const formData = new FormData(form);
@@ -512,9 +518,7 @@ class AdminDashboard {
                     data[key] = value;
                 });
                 data.id = userId; // Add the user ID
-                
                 const urlEncodedData = new URLSearchParams(data).toString();
-                
                 response = await this.makeAuthenticatedRequest('/local_greeter/api/index.php?action=adminUsers', {
                     method: 'PUT',
                     headers: {
@@ -530,9 +534,7 @@ class AdminDashboard {
                     body: formData
                 });
             }
-            
             if (!response) return;
-            
             const data = await response.json();
             if (data.success) {
                 this.closeAllModals();
@@ -543,7 +545,7 @@ class AdminDashboard {
             }
         } catch (error) {
             console.error('Error saving user:', error);
-            this.showNotification('Error saving user', 'error');
+            this.showNotification('Error saving user: ' + (error.message || error), 'error');
         }
     }
 
@@ -558,11 +560,13 @@ class AdminDashboard {
             if (!response) return;
             
             const data = await response.json();
+            console.log('Delete user response:', data); // Debug log
             if (data.success) {
                 this.loadUsers();
                 this.showNotification('User deleted successfully', 'success');
             } else {
                 this.showNotification(data.message || 'Error deleting user', 'error');
+                console.error('Delete user error:', data);
             }
         } catch (error) {
             console.error('Error deleting user:', error);
@@ -632,10 +636,19 @@ class AdminDashboard {
     async saveEvent() {
         const form = document.getElementById('event-form');
         const eventId = form.dataset.eventId;
-        
+        const title = form['event-title'].value.trim();
+        const description = form['event-description'].value.trim();
+        const fieldId = form['event-field'].value.trim();
+        const sportType = form['event-sport'].value.trim();
+        const startTime = form['event-start'].value.trim();
+        const endTime = form['event-end'].value.trim();
+        const maxParticipants = form['event-max'].value.trim();
+        if (!title || !description || !fieldId || !sportType || !startTime || !endTime || !maxParticipants) {
+            this.showNotification('All fields are required', 'error');
+            return;
+        }
         try {
             let response;
-            
             if (eventId) {
                 // PUT request - convert FormData to URL-encoded string
                 const formData = new FormData(form);
@@ -644,9 +657,7 @@ class AdminDashboard {
                     data[key] = value;
                 });
                 data.id = eventId; // Add the event ID
-                
                 const urlEncodedData = new URLSearchParams(data).toString();
-                
                 response = await this.makeAuthenticatedRequest('/local_greeter/api/index.php?action=adminEvents', {
                     method: 'PUT',
                     headers: {
@@ -662,9 +673,7 @@ class AdminDashboard {
                     body: formData
                 });
             }
-            
             if (!response) return;
-            
             const data = await response.json();
             if (data.success) {
                 this.closeAllModals();
@@ -675,7 +684,7 @@ class AdminDashboard {
             }
         } catch (error) {
             console.error('Error saving event:', error);
-            this.showNotification('Error saving event', 'error');
+            this.showNotification('Error saving event: ' + (error.message || error), 'error');
         }
     }
 
