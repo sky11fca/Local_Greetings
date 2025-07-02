@@ -35,8 +35,16 @@ class AdminDashboard {
             return null;
         }
 
+        let headers = this.getAuthHeaders();
+        // If sending FormData, let the browser set Content-Type
+        if (options.body instanceof FormData) {
+            // Remove Content-Type if present
+            if (headers['Content-Type']) {
+                delete headers['Content-Type'];
+            }
+        }
         const defaultOptions = {
-            headers: this.getAuthHeaders(),
+            headers,
             ...options
         };
 
